@@ -68,3 +68,33 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+## Using Docker
+
+To containerize and run this React app using Docker, follow these steps:
+
+1. **Ensure Docker Desktop is Running**
+
+   Make sure you have Docker installed and Docker Desktop is running on your machine.
+
+2. **Build the Docker Image**
+
+   Navigate to the `frontend/` directory in your project using your terminal:
+
+   `cd frontend`
+
+   Then, build the Docker image by running the following command:
+   `docker build -t frontend .`
+
+3. **Run the Docker Container**
+
+    Once the image is built, you can run it in a container using the following command:
+
+    `docker run -d -p 3000:3000 frontend`
+
+    This command will start the React app in a detached mode (-d), mapping port 3000 of the container to port 3000 on your local machine.
+
+4. **Access the Application**
+
+Open your browser and navigate to [http://localhost:3000](http://localhost:3000) to view your React app running inside the Docker container.
