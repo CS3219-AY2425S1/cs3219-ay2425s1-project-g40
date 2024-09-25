@@ -2,21 +2,15 @@ import React, { useState } from 'react';
 import './QuestionPage.css'; 
 
 const QuestionPage = () => {
-
-  //shared logic between left and right, probably just the edit/create new qn state
-
-  //Either create or edit mode.
+  //Shared logic between left and right, probably just the edit/create new qn state
   const [mode, setMode] = useState("create");
   const [questionEdit, setEdit] = useState("None");
 
-
-
-  //left side logic
+  //Left side logic
   const [questions, setQuestions] = useState([
     { id: 1, title: "item1", complexity: "Easy", description: "Implement a function to detect if a linked list contains a cycle." },
     { id: 2, title: "item2", complexity: "Medium", description: "Description for item2" },
     { id: 3, title: "item3", complexity: "Hard", description: "Description for item3" },
-    // more items...
   ]);
 
   const [selectedQuestion, setSelectedQuestion] = useState(null);
@@ -26,48 +20,44 @@ const QuestionPage = () => {
   };
 
   const handleDelete = () => {
-    // setQuestions(questions.filter((question) => question.id !== selectedQuestion.id));
-    // setSelectedQuestion(null);  // Clear selected question after deletion
-    // call delete api on question id
+    // Remove the selected question and clear the selected question state
+    setQuestions(questions.filter((question) => question.id !== selectedQuestion.id));
+    setSelectedQuestion(null);
+    // API call to delete question can be added here
   };
 
-
-
+  const handleEdit = () => {
+    setMode("edit");
+    setEdit(selectedQuestion); // Set the question to edit
+    // Optionally, prefill the form fields with selected question data
+  };
 
   //Right side logic
   const [difficulty, setDifficulty] = useState('easy');
   const [topic, setTopic] = useState('loops');
   const [question, setQuestion] = useState('');
 
-
   const clearState = () => {
     setDifficulty("easy");
     setTopic("loops");
     setQuestion("");
-  }
+    setMode("create"); // Reset mode to "create" when clearing
+    setEdit("None"); // Clear the currently edited question as well
+  };
+  
 
-  // Handle API call on button press
   const handleSetQuestion = async () => {
-    // Prepare data
-    const data = {
-      difficulty,
-      topic,
-      question,
-    };
+    const data = { difficulty, topic, question };
 
     try {
-      // Make API call (replace 'your-api-url' with your actual API endpoint)
       const response = await fetch('your-api-url', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
       if (response.ok) {
-        // Clear the question field if the request was successful
-        setQuestion('');
+        setQuestion(''); // Clear the question after submission
         alert('Question submitted successfully!');
       } else {
         alert('Failed to submit question.');
@@ -78,12 +68,8 @@ const QuestionPage = () => {
     }
   };
 
-
-
-
-
   return (
-    <div class="question-page-container">
+    <div className="question-page-container">
       <div className="left-section pr-4 overflow-y-auto" style={{ width: '45%' }}>
         <h1 className="text-2xl font-bold mb-4">Question Repository</h1>
         <table className="min-w-full table-fixed bg-white border border-gray-300 rounded-lg overflow-hidden shadow-lg">
@@ -97,9 +83,7 @@ const QuestionPage = () => {
             {questions.map((question, index) => (
               <tr
                 key={question.id}
-                className={`${
-                  index % 2 === 0 ? 'bg-blue-50' : 'bg-white'
-                } hover:bg-blue-100 cursor-pointer transition duration-300`}
+                className={`${index % 2 === 0 ? 'bg-blue-50' : 'bg-white'} hover:bg-blue-100 cursor-pointer transition duration-300`}
                 onClick={() => handleTitleClick(question)}
               >
                 <td className="py-2 px-4 border-b">{question.title}</td>
@@ -109,21 +93,31 @@ const QuestionPage = () => {
           </tbody>
         </table>
 
-        {/* Display selected question's description and delete button */}
+        {/* Display selected question's description with Edit and Delete buttons */}
         <div className="mt-4">
           {selectedQuestion ? (
             <div className="p-4 border border-gray-300 rounded-lg shadow-lg bg-white">
               <h2 className="font-bold text-xl">{selectedQuestion.title} - Description</h2>
               <p className="mt-2 text-gray-700">{selectedQuestion.description}</p>
               
-              <div className="mt-4">
+              <div className="mt-4 flex justify-between">
+                {/* Delete Button */}
                 <button
                   className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                   onClick={handleDelete}
                 >
                   Delete Question
                 </button>
+
+                {/* Edit Button */}
+                <button
+                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 ml-auto"
+                  onClick={handleEdit}
+                >
+                  Edit Question
+                </button>
               </div>
+
             </div>
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -133,16 +127,13 @@ const QuestionPage = () => {
         </div>
       </div>
 
-
-      {/**Right section uses normal CSS, 55% vw. */}
-
-      <div class="right-section">
-
-        <div class="info-row" id="curmode">
+      {/* Right section for creating/editing questions */}
+      <div className="right-section">
+        <div className="info-row" id="curmode">
           Mode: {mode === "create" ? "Creating new question" : "Editing question"}
         </div>
 
-        <div class="row">
+        <div className="row">
           <label htmlFor="difficulty">Difficulty:</label>
           <select 
             id="difficulty" 
@@ -158,7 +149,7 @@ const QuestionPage = () => {
           <label htmlFor="topic">Topic:</label>
           <select 
             id="topic" 
-            class="dropdown"
+            className="dropdown"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
           >
@@ -168,31 +159,26 @@ const QuestionPage = () => {
           </select>
         </div>
 
-        <div class="question-section">
+        <div className="question-section">
           <label htmlFor="question">Question:</label>
           <textarea
-          id="question"
-          className="textarea"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
+            id="question"
+            className="textarea"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
           />
         </div>
 
-        <div class="button-section">
-
-          <div class = "button-box">
-            <button class="clear-question-button" onClick={clearState}>Clear/Exit</button>
+        <div className="button-section">
+          <div className="button-box">
+            <button className="clear-question-button" onClick={clearState}>Clear/Exit</button>
           </div>
 
-          <div class="button-box-right" onClick={handleSetQuestion}>
-            <button class="set-question-button">Set Question</button>
+          <div className="button-box-right" onClick={handleSetQuestion}>
+            <button className="set-question-button">Set Question</button>
           </div>
         </div>
       </div>
-
-
-
-
     </div>
   );
 };
