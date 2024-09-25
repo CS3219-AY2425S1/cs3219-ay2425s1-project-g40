@@ -47,26 +47,48 @@ const QuestionPage = () => {
   
 
   const handleSetQuestion = async () => {
-    const data = { difficulty, topic, question };
-
+    // Prepare data
+    const data = {
+      difficulty,
+      topic,
+      question,
+    };
+  
     try {
-      const response = await fetch('your-api-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      // Check if in edit mode (questionEdit state)
+      const apiUrl = questionEdit === "None" ? 'your-api-url/post' : `your-api-url/patch/${selectedQuestion.id}`; // Update URL as needed
+      
+      // Make API call
+      const method = questionEdit === "None" ? 'POST' : 'PATCH'; // Use POST for new questions, PATCH for editing
+      const response = await fetch(apiUrl, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
-
+  
       if (response.ok) {
-        setQuestion(''); // Clear the question after submission
-        alert('Question submitted successfully!');
+        // Clear the question field if the request was successful
+        setQuestion('');
+        alert(questionEdit === "None" ? 'Question created successfully!' : 'Question updated successfully!');
+        
+        // Optionally reset state or fetch updated questions
+        if (questionEdit !== "None") {
+          clearState(); // Reset the form if editing
+        }
+  
+        // You may also want to refresh the questions list here if needed
+        // setQuestions(updatedQuestions); // Fetch updated questions list if required
       } else {
-        alert('Failed to submit question.');
+        alert(questionEdit === "None" ? 'Failed to Add a new question.' : 'Failed to Edit current question.');
       }
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred.');
     }
   };
+  
 
   return (
     <div className="question-page-container">
