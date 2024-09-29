@@ -1,5 +1,5 @@
 from beanie import init_beanie
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,12 +35,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def app_lifespan(app: FastAPI):
     # onStart:
     logger.info("📚 Question service started")
-    client: AsyncIOMotorClient = AsyncIOMotorClient(
-        "mongodb://localhost:27017",
-    )
+    client: AsyncIOMotorClient = AsyncIOMotorClient("mongodb://localhost:27017", serverselectiontimeoutms=10000)
+    try:
+        await init_beanie(client.questions_db, document_models=[Question])
+        logger.info(f"✅ Connected to MongDB: {client.address}")
+    except Exception:
+        logger.error("🛑 Unable to connect to MongoDB")
 
-    await init_beanie(client.questions_db, document_models=[Question])
-    logger.info(f"✅ Connected to MongDB: {client.address}")
     app.include_router(main_router)
 
     yield
