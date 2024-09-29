@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 
+const initialQuestionData = {
+  title: "",
+  description: "",
+  difficulty: "Easy",
+  topic: ""
+};
+
 export default function CreateQuestionModal({ createQuestionHandler }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [questionData, setQuestionData] = useState({
-    title: "",
-    description: "",
-    difficulty: "Easy",
-    topic: ""
-  })
+  const [questionData, setQuestionData] = useState(initialQuestionData)
+
+  const handleClose = () => {
+    setQuestionData(initialQuestionData); // Reset the form data when the modal is closed
+    setIsOpen(false);
+  };
 
   return (
     <>
@@ -28,7 +35,7 @@ export default function CreateQuestionModal({ createQuestionHandler }) {
                 <h3 className="text-2xl font-semibold">Create question</h3>
                 <button 
                     className='bg-zinc-200 hover:bg-zinc-400 rounded-full text-xs font-semibold text-slate-900 border'
-                    onClick={() => setIsOpen(false)}>
+                    onClick={handleClose}>
                       X
                 </button>
               </div>
@@ -44,7 +51,7 @@ export default function CreateQuestionModal({ createQuestionHandler }) {
                   <button
                     className="bg-zinc-200 hover:bg-red-600 text-sm text-red-500 px-4 py-2 rounded-2xl  font-semibold
                     hover:text-white"
-                    onClick={() => setIsOpen(false)}
+                    onClick={handleClose}
                   >
                     Cancel
                   </button>
