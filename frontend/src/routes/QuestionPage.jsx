@@ -70,7 +70,7 @@ const QuestionPage = () => {
   const handleEditQuestion = async (editedQuestion) => {
     try {
       const response = await fetch(`${apiurl}${editedQuestion.titleSlug}/`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
