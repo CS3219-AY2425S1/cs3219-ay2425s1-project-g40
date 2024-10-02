@@ -44,6 +44,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
-          context: "{{defaultContext}}:db/question-db"
+          context: "{{defaultContext}}:/backend/db/question-db"
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
