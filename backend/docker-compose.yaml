@@ -1,0 +1,22 @@
+services:
+  user-db:
+    build:
+      context: ./db/user-db
+      dockerfile: Dockerfile
+    ports:
+      - "27018:27018"
+    environment:
+    - MONGO_INITDB_DATABASE=users_db
+    - INIT_QUESTION_COLLECTION=users
+  user-service:
+    depends_on:
+      - user-db
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    environment:
+      - USER_DB_URL=mongodb://user-db:27018 # note that the URL is referencing the container name
+      - DB_NAME=users_db
+      - COLLECTION_NAME=users
+    ports:
+      - "8000:8000"
