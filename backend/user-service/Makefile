@@ -12,16 +12,16 @@ dropdb:
 
 .PHONY: server
 server:
-	@uvicorn user_service.main:app --reload --host 0.0.0.0 --port 8000
+	@uvicorn user-service.main:app --reload --host 0.0.0.0 --port 8000
 
 .PHONY: test
 test:
-	@pytest --cov=user_service
+	@pytest --cov=user-service
 
 .PHONY: lint
 lint:
-	@ruff check user_service/* tests/*
+	@ruff check user-service/* tests/*
 
 .PHONY: format
 format:
-	@ruff format user_service/* tests/*
+	@ruff format user-service/* tests/*
