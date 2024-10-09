@@ -2,13 +2,27 @@ from fastapi import APIRouter, HTTPException, Response, status
 from pymongo.errors import DuplicateKeyError
 from structlog import get_logger
 
-from ..models import Question
+from ..models import Difficulty, Question
 from ..schemas import CreateQuestionModel, UpdateQuestionModel
 from ..service.question_service import create_question as create_question_db
 from ..service.question_service import delete_question, get_question, get_questions, update_question
+from ..service.question_service import get_difficulties as get_difficulties_db
+from ..service.question_service import get_topics as get_topics_db
 
 router = APIRouter()
 logger = get_logger()
+
+
+@router.get("/topic", response_model=set[str])
+async def get_topics():
+    topics = await get_topics_db()
+    return topics
+
+
+@router.get("/difficulty", response_model=set[str])
+async def get_difficulties():
+    difficulties = await get_difficulties_db()
+    return difficulties
 
 
 @router.get("/question/{titleSlug}", response_model=Question)
@@ -51,10 +65,10 @@ async def update_question_by_title(titleSlug: str, req: UpdateQuestionModel) -> 
 
 
 @router.get("/question/", response_model=list[Question])
-async def get_all_questions() -> list[Question]:
+async def get_all_questions(topic: str | None = None, difficulty: Difficulty | None = None) -> list[Question]:
     logger.info("Retrieving all questions")
 
-    questions = await get_questions()
+    questions = await get_questions(topic, difficulty)
     if questions is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There are no questions in question bank")
     return questions

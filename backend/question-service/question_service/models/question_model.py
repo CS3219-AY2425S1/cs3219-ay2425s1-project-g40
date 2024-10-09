@@ -1,6 +1,7 @@
 from enum import Enum
 
 from beanie import Document
+from pydantic import BaseModel, ConfigDict
 
 from ..config import settings
 
@@ -31,3 +32,8 @@ class Question(Document):
                 "topic": "Array",
             }
         }
+
+
+class QuestionTopic(BaseModel):
+    topic: str
+    model_config = ConfigDict(populate_by_name=True)
