@@ -1,0 +1,77 @@
+.register-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #e0f7fa; /* Same soft background color */
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.main-header {
+    font-size: 40px;
+    font-weight: bold;
+    color: #00796b; /* Same vibrant green as login page */
+    margin: 0;
+}
+
+.sub-header {
+    font-size: 18px;
+    color: #004d40; /* Darker green for contrast */
+    margin: 5px 0 20px;
+}
+
+.register-form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow for form */
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600; /* Bold labels */
+    color: #00796b; /* Matching header color */
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

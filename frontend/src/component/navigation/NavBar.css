@@ -1,0 +1,24 @@
+.navbar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between; /* Space between items */
+    align-items: center; /* Center items vertically */
+}
+
+.navbar-content {
+    display: flex;
+    flex-grow: 1;
+}
+
+.logout-button {
+    background-color: transparent;
+    border: 1px solid #6c757d;
+    color: #6c757d; 
+    cursor: pointer;
+    font-weight: bold; 
+    padding: 5px 10px; /*  add padding for a better click area */
+    border-radius: 5px; 
+    margin-left: auto; 
+}
