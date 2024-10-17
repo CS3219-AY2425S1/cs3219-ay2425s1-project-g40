@@ -7,16 +7,14 @@ from redis import Redis
 from structlog import get_logger
 
 from matching_service.common import MatchRequest
-from matching_service.config import RedisSettings
+from matching_service.config import RedisSettings, settings
 
 logger = get_logger()
 
 
 """
 TODO
-- Use Redis `SortedSet` instead of `List`
 - Write to `MATCHES` channel instead of just logging results
-- Run process in background that removes stale matches
 """
 
 
@@ -24,7 +22,7 @@ class Matchmaker:
     def __init__(self):
         self.channel = RedisSettings.Channels.REQUESTS
         self.client: Redis = Redis.from_url(RedisSettings.redis_url(self.channel))
-
+        self.timeout: int = settings.MATCH_TIMEOUT
         self.pubsub = self.client.pubsub()
 
         self._stop_event = Event()
@@ -47,16 +45,13 @@ class Matchmaker:
                 logger.info(f"\t💬 Received matchmaking request from User {req.user} for {req.get_key()}")
 
                 unmatched_key = req.get_key()
-                # self.client.zrangebyscore
-                unmatched_users = self.client.lrange(unmatched_key, 0, -1)
-
-                if unmatched_users:
-                    # self.client.zpopmin
-                    other_user = self.client.lpop(unmatched_key).decode("utf-8")
+                unmatched_user_exists = self.client.exists(unmatched_key)
+                if unmatched_user_exists:
+                    other_user = self.client.get(unmatched_key).decode("utf-8")
+                    self.client.delete(unmatched_key)
                     logger.info(f"\t✅ Matched Users: {req.user} and {other_user} for {unmatched_key}!")
                 else:
-                    # self.client.zadd, name="Easy:dp", score=req.timestamp, value=req.user
-                    self.client.rpush(unmatched_key, req.user)
+                    self.client.setex(unmatched_key, self.timeout, req.user)
                     logger.info(f"\t⏳ User {req.user} added to the unmatched pool for {unmatched_key}")
             time.sleep(0.1)
 

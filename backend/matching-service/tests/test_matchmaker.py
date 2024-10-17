@@ -20,12 +20,13 @@ def redis_container():
         yield test_client
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def matchmaker_thread(redis_container: Redis):
     """Fixture to set up the Matchmaker with a background thread."""
     mm = Matchmaker()
     mm.client = redis_container
     mm.pubsub = mm.client.pubsub()
+    mm.timeout = 2
 
     thread = Thread(target=mm.run)
     thread.start()
@@ -44,12 +45,11 @@ def test_single_user_leaves_user_in_queue(redis_container: Redis, matchmaker_thr
 
     time.sleep(1)
 
-    result = redis_container.lrange(match_req.get_key(), 0, -1)
-    assert len(result) == 1
+    result = redis_container.exists(match_req.get_key())
+    assert result == 1
 
 
 def test_match_removes_users(redis_container: Redis, matchmaker_thread: Thread):
-    """Test that a single user request remains in the queue."""
     redis_container.flushall()
     match_req1 = MatchRequest(user="user1", difficulty="Easy", topic="test")
     match_req2 = MatchRequest(user="user2", difficulty="Easy", topic="test")
@@ -59,8 +59,8 @@ def test_match_removes_users(redis_container: Redis, matchmaker_thread: Thread):
 
     time.sleep(0.5)
 
-    result = redis_container.lrange(match_req1.get_key(), 0, -1)
-    assert len(result) == 0
+    result = redis_container.exists(match_req1.get_key())
+    assert result == 0
 
 
 def test_users_with_different_topic_does_not_match(redis_container: Redis, matchmaker_thread: Thread):
@@ -73,7 +73,22 @@ def test_users_with_different_topic_does_not_match(redis_container: Redis, match
 
     time.sleep(0.5)
 
-    topic1 = redis_container.lrange(match_req1.get_key(), 0, -1)
-    assert len(topic1) == 1
-    topic2 = redis_container.lrange(match_req2.get_key(), 0, -1)
-    assert len(topic2) == 1
+    topic1 = redis_container.exists(match_req1.get_key())
+    assert topic1 == 1
+    topic2 = redis_container.exists(match_req2.get_key())
+    assert topic2 == 1
+
+
+def test_expired_requests_does_not_match(redis_container: Redis, matchmaker_thread: Thread):
+    redis_container.flushall()
+    match_req1 = MatchRequest(user="user1", difficulty="Easy", topic="test")
+    match_req2 = MatchRequest(user="user2", difficulty="Easy", topic="test")
+
+    request_match(redis_container, match_req1)
+    time.sleep(2.2)
+    request_match(redis_container, match_req2)
+
+    time.sleep(0.5)
+
+    result = redis_container.exists(match_req1.get_key())
+    assert result == 1
