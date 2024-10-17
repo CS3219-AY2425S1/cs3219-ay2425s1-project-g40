@@ -5,7 +5,12 @@ redis:
 
 .PHONY: server
 server:
-	@uvicorn matching_service.api:app --reload --host 0.0.0.0 --port 8002
+	@uvicorn matching_service.api:app --reload --host 0.0.0.0 --port 8000
+
+
+.PHONY: matchmaker
+matchmaker:
+	@python3 -m matching_service.matchmaker
 
 .PHONY: test
 test:
