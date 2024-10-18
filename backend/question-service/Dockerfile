@@ -5,7 +5,7 @@
 # Multi-stage build to keep images small
 #
 # https://pythonspeed.com/articles/multi-stage-docker-python/
-FROM python:3.12.7-alpine AS python-base
+FROM --platform=linux/amd64 python:3.12.7-alpine AS python-base
 
 ENV PYTHONUNBUFFERED=1 \
     # prevents python creating .pyc files
@@ -27,7 +27,9 @@ RUN apk upgrade --no-cache  && \
 WORKDIR $PYSETUP_PATH
 COPY requirements.txt ./
 
-RUN pip install -r requirements.txt
+#  https://github.com/grpc/grpc/issues/22815
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
 FROM python-base AS development
 ENV FASTAPI_ENV=development

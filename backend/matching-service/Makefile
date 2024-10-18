@@ -5,7 +5,15 @@ redis:
 
 .PHONY: server
 server:
-	@uvicorn matching_service.api:app --reload --host 0.0.0.0 --port 8002
+	@uvicorn matching_service.api:app --reload --host 0.0.0.0 --port 8000
+
+.PHONY: proto
+proto:
+	@python3 -m grpc_tools.protoc -I ../protos --python_out=./matching_service/protos --pyi_out=./matching_service/protos --grpc_python_out=./matching_service/protos ../protos/question.proto
+
+.PHONY: matchmaker
+matchmaker:
+	@python3 -m matching_service.matchmaker
 
 .PHONY: test
 test:

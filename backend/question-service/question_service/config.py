@@ -22,7 +22,7 @@ ENV_PATH = Path(PROJECT_ROOT) / ".env"
 
 
 class Settings(BaseSettings):
-    QUESTION_DB_URL: str = "mongodb://localhost:27017"
+    QUESTION_DB_URL: str = "mongodb://localhost:27018"
     DB_NAME: str = "questions_db"
     COLLECTION_NAME: str = "questions"
     ORIGINS: list[str] = ["http://localhost", "http://localhost:3000"]

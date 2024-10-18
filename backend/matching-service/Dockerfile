@@ -5,7 +5,7 @@
 # Multi-stage build to keep images small
 #
 # https://pythonspeed.com/articles/multi-stage-docker-python/
-FROM python:3.12.7-alpine AS python-base
+FROM --platform=linux/amd64 python:3.12.7-alpine AS python-base
 
 ENV PYTHONUNBUFFERED=1 \
     # prevents python creating .pyc files

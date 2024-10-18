@@ -1,3 +1,6 @@
+import asyncio
+
+import uvicorn
 from beanie import init_beanie
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -9,6 +12,7 @@ from structlog import get_logger
 
 from .api import main_router
 from .config import settings
+from .grpc import serve
 from .models import Question
 from .schemas import CustomValidationErrorResponse
 
@@ -42,6 +46,7 @@ async def app_lifespan(app: FastAPI):
     except Exception:
         logger.error("🛑 Unable to connect to MongoDB")
 
+    asyncio.ensure_future(serve())
     app.include_router(main_router)
 
     yield
