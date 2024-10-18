@@ -25,6 +25,7 @@ services:
   ## User service
   user-db:
     image: mongodb/mongodb-community-server:6.0.8-ubi9
+    command: mongod --quiet --logpath /dev/null
     ports:
       # map port 27017 of user-db to 27018 of local machine
       - "27018:27017"
@@ -36,8 +37,36 @@ services:
       dockerfile: Dockerfile
     environment:
       - DB_LOCAL_URI=mongodb://user-db:27017/peerprepUserServiceDB  # Connect to port 27017 of **user-db**, NOT 27018
-      - PORT=8001
+      - PORT=8000
       - ENV=DEV
       - JWT_SECRET=cs3219ay2425-s1-g40-jwt-signature
     ports:
-      - "8001:8001"
+      - "8001:8000"
+
+  ## Matching service
+  matchmaker-redis:
+    image: redis:alpine3.20
+    ports:
+      - "6739:6739"
+  matching-service:
+    depends_on:
+      - matchmaker-redis
+    build:
+      context: ./matching-service
+      dockerfile: Dockerfile
+    command: make server
+    environment:
+      - REDIS_HOST=matchmaker-redis
+      - REDIS_PORT=6379
+    ports:
+      - "8002:8000"
+  matching-worker:
+      depends_on:
+        - matchmaker-redis
+      build:
+        context: ./matching-service
+        dockerfile: Dockerfile
+      command: make matchmaker
+      environment:
+        - REDIS_HOST=matchmaker-redis
+        - REDIS_PORT=6379
