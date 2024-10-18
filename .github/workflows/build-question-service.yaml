@@ -1,0 +1,50 @@
+# https://docs.github.com/en/actions/use-cases-and-examples/publishing-packages/publishing-docker-images
+
+name: Create and publish Question Service
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  REPO: cs3219-ay2425s1/cs3219-ay2425s1-project-g40
+  IMAGE_NAME: question-service
+  LATEST_TAG: latest
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: "{{defaultContext}}:/backend/question-service"
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO }}/${{ env.IMAGE_NAME }}:${{ env.LATEST_TAG }}
