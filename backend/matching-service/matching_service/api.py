@@ -1,7 +1,7 @@
 import structlog
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from redis import Redis
+from redis import Redis, RedisError
 from structlog import get_logger
 
 from matching_service.common import MatchRequest
@@ -10,6 +10,8 @@ from matching_service.config import RedisSettings
 from .common import Difficulty
 from .config import Channels, settings
 from .grpc import query_num_questions
+
+import json
 
 structlog.configure(
     processors=[
@@ -38,11 +40,37 @@ app.add_middleware(
 match_request_redis_url = RedisSettings.redis_url(Channels.REQUESTS)
 redis_client = Redis.from_url(match_request_redis_url)
 
-
 def request_match(publisher: Redis, user: MatchRequest):
     channel = Channels.REQUESTS.value
     publisher.publish(channel, user.model_dump_json())
     logger.info(f"CLIENT: User {user.user} requested match for {user.topic}, {user.difficulty}")
+
+# Endpoint to query matches for a user
+@app.get("/matches/{user_id}")
+async def get_matches(user_id: str):
+    pattern_user = f"match:{user_id}:*"
+    pattern_other = f"match:*:{user_id}"
+    matches = []
+    try:
+        cursor = '0'
+        patterns = [pattern_user, pattern_other]
+        while cursor != 0:
+            for pattern in patterns:
+                cursor, match_keys = redis_client.scan(cursor=cursor, match=pattern)
+                for key in match_keys:
+                    match_data = redis_client.get(key)
+                    if match_data:
+                        matches.append(json.loads(match_data))
+        
+        if not matches:
+            return {"message": "No matches found"}
+        return {"matches": matches}
+    except RedisError as e:
+        logger.error(f"Error while retrieving matches for {user_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An error occurred while retrieving matches."
+        )
+
 
 
 @app.get("/")
