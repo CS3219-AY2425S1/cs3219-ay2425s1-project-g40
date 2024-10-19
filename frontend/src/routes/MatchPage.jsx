@@ -24,7 +24,6 @@ function MatchPage() {
 
 
   const checkStatus = (id) => {
-    alert(`http://localhost:8002/matches/${id}`);
     fetch(`http://localhost:8002/matches/${id}`)
       .then(response => {
         if (!response.ok) {
