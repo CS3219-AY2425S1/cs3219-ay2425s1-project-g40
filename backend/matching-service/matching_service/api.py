@@ -39,10 +39,16 @@ match_request_redis_url = RedisSettings.redis_url(Channels.REQUESTS)
 redis_client = Redis.from_url(match_request_redis_url)
 
 
-def request_match(publisher: Redis, user: MatchRequest):
+def request_match(publisher: Redis, req: MatchRequest):
+    existing_state = publisher.get(req.user)
+    logger.info("Existing state" + str(existing_state))
+    if existing_state == b"PENDING":
+        logger.info("Caught")
+        raise ValueError("Existing match request")
+
     channel = Channels.REQUESTS.value
-    publisher.publish(channel, user.model_dump_json())
-    logger.info(f"CLIENT: User {user.user} requested match for {user.topic}, {user.difficulty}")
+    publisher.publish(channel, req.model_dump_json())
+    logger.info(f"CLIENT: User {req.user} requested match for {req.topic}, {req.difficulty}")
 
 
 @app.get("/")
@@ -73,6 +79,8 @@ async def create_match(req: MatchRequest):
 
         # Return a success response
         return {"message": f"Match request for {req.user} has been created successfully."}
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Match request in progress")
     except Exception as e:
         logger.error(f"Error while creating match: {e}")
         raise HTTPException(

@@ -95,6 +95,7 @@ def test_expired_requests_does_not_match(redis_container: Redis, matchmaker_thre
 
 
 def test_exception_handler_called_on_invalid_request(mocker, redis_container: Redis):
+    redis_container.flushall()
     mm = Matchmaker()
     exception_handler_spy = mocker.spy(mm, "exception_handler")
     mm.client = redis_container
@@ -108,3 +109,18 @@ def test_exception_handler_called_on_invalid_request(mocker, redis_container: Re
     mm.stop()
 
     assert exception_handler_spy.call_count == 1
+
+
+def test_consecutive_requests_raises_error(redis_container: Redis, matchmaker_thread: Matchmaker):
+    redis_container.flushall()
+    match_req1 = MatchRequest(user="user1", difficulty="Easy", topic="test")
+    match_req2 = MatchRequest(user="user1", difficulty="Easy", topic="test")
+
+    request_match(redis_container, match_req1)
+    with pytest.raises(ValueError):
+        time.sleep(0.5)
+        request_match(redis_container, match_req2)
+
+    result = redis_container.exists(match_req1.get_key())
+    # first request should still exist
+    assert result == 1
