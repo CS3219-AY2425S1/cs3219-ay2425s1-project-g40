@@ -76,7 +76,7 @@ function MatchPage() {
           if (status == "Still finding") {
             setStatus('Match cannot find in time!');
           }
-        }, 20000);
+        }, 33000);
         return response.json(); // Assuming the server returns JSON
       })
       .then(data => {
