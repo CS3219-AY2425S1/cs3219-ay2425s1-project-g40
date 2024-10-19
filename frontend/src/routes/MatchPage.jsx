@@ -4,11 +4,13 @@ import './MatchPage.css';
 function MatchPage() {
 
   const intervalIdRef = useRef(null);
+  var intervalId = useRef(null);
 
   const [topics, setTopics] = useState([]); // State to store the fetched topics
   const [topic, setTopic] = useState("");  // State to store the selected topic
   const [difficulty, setDifficulty] = useState('Easy');
   const [status, setStatus] = useState('Waiting for button to be pressed');
+  const [time, setTime] = useState(0);
 
   // Fetch topics from API when the component mounts
   useEffect(() => {
@@ -43,6 +45,7 @@ function MatchPage() {
         if(data.matches != undefined) {
           setStatus(`${id} has matched with user: ${data.matches.user_id} with topic: ${data.matches.key}`);
           clearInterval(intervalIdRef.current);
+          clearInterval(intervalId);
         } else {
           setStatus("Still finding")
         }
@@ -77,8 +80,12 @@ function MatchPage() {
         }
         checkStatus(user.id)
         intervalIdRef.current = setInterval(() => checkStatus(user.id), 2000);
+        intervalId = setInterval(() => {
+          setTime((prevTime) => prevTime + 1); // Increment time
+        }, 1000);
         setTimeout(() => {
           clearInterval(intervalIdRef.current);
+          clearInterval(intervalId);
           if (status == "Still finding") {
             setStatus('Match cannot find in time!');
           }
@@ -130,7 +137,7 @@ function MatchPage() {
       </div>
 
       <div className="status-display">
-        {status}
+        {status + "; Time passed since start:"+time}
       </div>
     </div>
   );
