@@ -5,7 +5,7 @@ function MatchPage() {
 
   const [topics, setTopics] = useState([]); // State to store the fetched topics
   const [topic, setTopic] = useState("");  // State to store the selected topic
-  const [difficulty, setDifficulty] = useState('easy');
+  const [difficulty, setDifficulty] = useState('Easy');
   const [status, setStatus] = useState('Waiting for button to be pressed');
 
   // Fetch topics from API when the component mounts
@@ -63,9 +63,9 @@ function MatchPage() {
         <div className="form-group">
           <label>Difficulty:</label>
           <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
           </select>
         </div>
       </div>
