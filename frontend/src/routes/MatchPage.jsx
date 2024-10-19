@@ -35,7 +35,7 @@ function MatchPage() {
       })
       .then(data => {
         if(data.matches != undefined) {
-          setStatus(data.matches[0]);
+          setStatus(data.matches);
           clearInterval(intervalIdRef.current);
         } else {
           setStatus("Still finding")
