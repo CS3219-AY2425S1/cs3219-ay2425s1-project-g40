@@ -40,9 +40,11 @@ class Matchmaker:
         self.r_thread = self.pubsub.run_in_thread(sleep_time=0.1, exception_handler=self.exception_handler)
 
     def _store_pending_match_transaction(self, key: str, user: str) -> None:
-        """ """
-        self.client.setex(key, self.timeout, user)
-        self.client.set(user, "PENDING")
+        pipeline = self.client.pipeline()
+
+        pipeline.setex(key, self.timeout, user)
+        pipeline.set(user, "PENDING")
+        pipeline.execute()
         return
 
     def message_handler(self, message: dict[str, Any] | None):
