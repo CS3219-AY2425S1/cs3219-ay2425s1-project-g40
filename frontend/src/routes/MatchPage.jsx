@@ -69,6 +69,7 @@ function MatchPage() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
+        checkStatus(user.id)
         intervalIdRef.current = setInterval(() => checkStatus(user.id), 2000);
         setTimeout(() => {
           clearInterval(intervalIdRef.current);
