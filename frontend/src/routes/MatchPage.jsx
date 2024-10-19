@@ -24,9 +24,11 @@ function MatchPage() {
 
 
   const checkStatus = (id) => {
+    alert(`http://localhost:8002/matches/${id}`);
     fetch(`http://localhost:8002/matches/${id}`)
       .then(response => {
         if (!response.ok) {
+          
           throw new Error('Network response was not ok');
         }
         return response.json();
@@ -67,9 +69,12 @@ function MatchPage() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        intervalIdRef.current = setInterval(checkStatus(user.id), 5000);
+        intervalIdRef.current = setInterval(checkStatus(user.id), 2000);
         const timeoutId = setTimeout(() => {
           clearInterval(intervalIdRef.current);
+          if (status == "Still finding") {
+            setStatus('Match cannot find in time!');
+          }
         }, 20000);
         return response.json(); // Assuming the server returns JSON
       })
