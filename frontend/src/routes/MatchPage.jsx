@@ -22,7 +22,7 @@ function MatchPage() {
         if (data.length > 0) {
           setTopic(data[0]); // Set the first topic as the default selected topic
         }})     // Set topics in state
-      .catch((error) => console.error("Error fetching topics:", error));
+      .catch((error) => toast.error("Error fetching topics:", error));
   }, []);
 
 
@@ -55,7 +55,7 @@ function MatchPage() {
       })
       .catch(error => {
         setStatus("Still finding")
-        console.log(error.message);
+        console.error(error.message);
       });
   };
 
