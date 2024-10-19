@@ -41,7 +41,7 @@ function MatchPage() {
       })
       .then(data => {
         if(data.matches != undefined) {
-          setStatus(data.matches);
+          setStatus(`${id} has matched with user: ${data.matches.user_id} with topic: ${data.matches.key}`);
           clearInterval(intervalIdRef.current);
         } else {
           setStatus("Still finding")
