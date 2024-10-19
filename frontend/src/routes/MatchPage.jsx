@@ -22,14 +22,13 @@ function MatchPage() {
   const handleMatchClick = () => {
     setStatus('Matching...difficulty:'+difficulty+"; topic:"+topic);
     // Simulate a delay for matching (e.g., API call)
-    const url = new URL('http://localhost:8000/match');
+    const url = new URL('http://localhost:8002/match');
     const user = JSON.parse(localStorage.getItem('user'));
     const payload = {
       topic: topic,
       difficulty: difficulty,
       user: user ? user.id : null // Add user ID if user is not null
     };
-    alert(user.id)
 
     fetch(url, {
       method: 'POST', // Change method to POST
@@ -45,16 +44,15 @@ function MatchPage() {
         return response.json(); // Assuming the server returns JSON
       })
       .then(data => {
-        setStatus(data); // Handle the response data
+        setStatus(data.message); // Handle the response data
         console.log('Success:', data); // Log success
       })
       .catch(error => {
+        setStatus('Match not found!');
         console.error('Error:', error); // Handle any errors
       });
 
-    setTimeout(() => {
-      setStatus('Match not found!');
-    }, 2000);
+
   };
 
   return (
