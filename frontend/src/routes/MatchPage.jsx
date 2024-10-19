@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './MatchPage.css';
+import { toast } from 'react-toastify';
+import Navbar from '../component/navigation/NavBar';
 
 function MatchPage() {
 
@@ -109,6 +111,7 @@ function MatchPage() {
 
   return (
     <div className="match-container">
+      <Navbar />
       <div className="diff">
         <div className="form-group">
           <label>Difficulty:</label>

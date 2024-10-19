@@ -33,7 +33,7 @@ function LoginPage() {
 
         localStorage.setItem('user', JSON.stringify(userData)); // Store all user data as a string in localStorage
         
-        navigate('/question'); // Redirect to the question page
+        navigate('/match'); // Redirect to the question page
       }
     } catch (error) {
       console.error("Error logging in:", error);
