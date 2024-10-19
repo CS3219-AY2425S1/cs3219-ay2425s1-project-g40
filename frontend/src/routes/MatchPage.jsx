@@ -69,8 +69,8 @@ function MatchPage() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        intervalIdRef.current = setInterval(checkStatus(user.id), 2000);
-        const timeoutId = setTimeout(() => {
+        intervalIdRef.current = setInterval(() => checkStatus(user.id), 2000);
+        setTimeout(() => {
           clearInterval(intervalIdRef.current);
           if (status == "Still finding") {
             setStatus('Match cannot find in time!');
