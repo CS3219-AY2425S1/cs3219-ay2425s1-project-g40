@@ -13,6 +13,11 @@ function MatchPage() {
   const [difficulty, setDifficulty] = useState('Easy');
   const [status, setStatus] = useState('Waiting for button to be pressed');
   const [time, setTime] = useState(0);
+  const statusRef = useRef(status);
+
+  useEffect(() => {
+    statusRef.current = status; // Update the ref whenever status changes
+  }, [status]);
 
   // Fetch topics from API when the component mounts
   useEffect(() => {
@@ -61,7 +66,6 @@ function MatchPage() {
 
 
   const handleMatchClick = () => {
-    setStatus('Matching...difficulty:'+difficulty+"; topic:"+topic);
     // Simulate a delay for matching (e.g., API call)
     const url = new URL('http://localhost:8002/match');
     const user = JSON.parse(localStorage.getItem('user'));
@@ -91,7 +95,7 @@ function MatchPage() {
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
-          if (status == "Still finding") {
+          if (statusRef.current == "Still finding") {
             setStatus('Match cannot find in time!');
           }
         }, 33000);
