@@ -1,5 +1,6 @@
 import json
 from typing import Any
+
 import structlog
 from pydantic import ValidationError
 from redis import Redis
@@ -16,6 +17,7 @@ structlog.configure(
 )
 
 logger = get_logger()
+
 
 class Matchmaker:
     def __init__(self):
@@ -65,10 +67,16 @@ class Matchmaker:
                     "user_id": str(req.user),
                     "other_user_id": str(other_user),
                     "key": unmatched_key,
-                    "status": "successful"
+                    "status": "successful",
                 }
                 try:
-                    self.client.set(match_key, json.dumps(match_data))
+                    pipeline = self.client.pipeline()
+
+                    pipeline.set(match_key, json.dumps(match_data))
+                    pipeline.delete(req.user)
+                    pipeline.delete(other_user)
+
+                    pipeline.execute()
                     logger.info(f"Match {match_key} between {req.user} and {other_user} recorded successfully.")
                 except Exception as e:
                     logger.error(f"Error while recording match: {e}")
