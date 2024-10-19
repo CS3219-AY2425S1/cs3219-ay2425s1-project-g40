@@ -1,6 +1,5 @@
 import json
 from typing import Any
-
 import structlog
 from pydantic import ValidationError
 from redis import Redis
@@ -17,13 +16,6 @@ structlog.configure(
 )
 
 logger = get_logger()
-
-
-"""
-TODO
-- Write to `MATCHES` channel instead of just logging results
-"""
-
 
 class Matchmaker:
     def __init__(self):
@@ -55,7 +47,6 @@ class Matchmaker:
             try:
                 req = MatchRequest(**user_data)
             except ValidationError as e:
-                # just raise and let redis exception_handler handle
                 raise ValueError(f"\tUnrecognised request format discarded: {e}")
 
             logger.info(f"\t💬 Received matchmaking request from User {req.user} for {req.get_key()}")
@@ -66,6 +57,22 @@ class Matchmaker:
                 other_user = self.client.get(unmatched_key).decode("utf-8")
                 self.client.delete(unmatched_key)
                 logger.info(f"\t✅ Matched Users: {req.user} and {other_user} for {unmatched_key}!")
+
+                # Add successful match directly in the block
+                logger.info("adding successful match")
+                match_key = f"match:{req.user}:{other_user}"
+                match_data = {
+                    "user_id": str(req.user),
+                    "other_user_id": str(other_user),
+                    "key": unmatched_key,
+                    "status": "successful"
+                }
+                try:
+                    self.client.set(match_key, json.dumps(match_data))
+                    logger.info(f"Match {match_key} between {req.user} and {other_user} recorded successfully.")
+                except Exception as e:
+                    logger.error(f"Error while recording match: {e}")
+                    raise
             else:
                 self._store_pending_match_transaction(unmatched_key, req.user)
                 logger.info(f"\t⏳ User {req.user} added to the unmatched pool for {unmatched_key}")
