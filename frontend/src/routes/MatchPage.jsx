@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './MatchPage.css';
 
 function MatchPage() {
+
+  const intervalIdRef = useRef(null);
 
   const [topics, setTopics] = useState([]); // State to store the fetched topics
   const [topic, setTopic] = useState("");  // State to store the selected topic
@@ -18,6 +20,27 @@ function MatchPage() {
         }})     // Set topics in state
       .catch((error) => console.error("Error fetching topics:", error));
   }, []);
+
+
+
+  const checkStatus = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const user_id = user.user_id;
+    fetch(`http://localhost:8002/matches/${user_id}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setStatus(data);
+      })
+      .catch(error => {
+        console.log(error.message);
+      });
+  };
+
 
   const handleMatchClick = () => {
     setStatus('Matching...difficulty:'+difficulty+"; topic:"+topic);
@@ -41,10 +64,12 @@ function MatchPage() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
+        intervalIdRef.current = setInterval(checkStatus, 5000);
         return response.json(); // Assuming the server returns JSON
       })
       .then(data => {
         setStatus(data.message); // Handle the response data
+        
         console.log('Success:', data); // Log success
       })
       .catch(error => {
