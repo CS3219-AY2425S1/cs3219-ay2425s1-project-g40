@@ -31,6 +31,14 @@ class Matchmaker:
         self.pubsub.subscribe(**{"requests": self.message_handler})
         self.r_thread = self.pubsub.run_in_thread(sleep_time=0.1, exception_handler=self.exception_handler)
 
+    def _store_pending_match_transaction(self, key: str, user: str) -> None:
+        pipeline = self.client.pipeline()
+
+        pipeline.setex(key, self.timeout, user)
+        pipeline.set(user, "PENDING")
+        pipeline.execute()
+        return
+
     def message_handler(self, message: dict[str, Any] | None):
         if message and message["type"] == "message":
             logger.info("MATCHMAKER: Received match request")
@@ -66,7 +74,7 @@ class Matchmaker:
                     logger.error(f"Error while recording match: {e}")
                     raise
             else:
-                self.client.setex(unmatched_key, self.timeout, req.user)
+                self._store_pending_match_transaction(unmatched_key, req.user)
                 logger.info(f"\t⏳ User {req.user} added to the unmatched pool for {unmatched_key}")
 
     def exception_handler(self, ex, _pubsub, _thread):
