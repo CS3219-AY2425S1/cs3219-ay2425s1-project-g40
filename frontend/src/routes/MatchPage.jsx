@@ -23,10 +23,8 @@ function MatchPage() {
 
 
 
-  const checkStatus = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const user_id = user.user_id;
-    fetch(`http://localhost:8002/matches/${user_id}`)
+  const checkStatus = (id) => {
+    fetch(`http://localhost:8002/matches/${id}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -34,7 +32,12 @@ function MatchPage() {
         return response.json();
       })
       .then(data => {
-        setStatus(data);
+        if(data.matches != undefined) {
+          setStatus(data.matches[0]);
+          clearInterval(intervalIdRef.current);
+        } else {
+          setStatus("Still finding")
+        }
       })
       .catch(error => {
         console.log(error.message);
@@ -64,11 +67,13 @@ function MatchPage() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        intervalIdRef.current = setInterval(checkStatus, 5000);
+        intervalIdRef.current = setInterval(checkStatus(user.id), 5000);
+        const timeoutId = setTimeout(() => {
+          clearInterval(intervalIdRef.current);
+        }, 20000);
         return response.json(); // Assuming the server returns JSON
       })
       .then(data => {
-        setStatus(data.message); // Handle the response data
         
         console.log('Success:', data); // Log success
       })
