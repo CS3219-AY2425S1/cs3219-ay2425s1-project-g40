@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Any
 
 import structlog
@@ -37,7 +38,7 @@ class Matchmaker:
         pipeline = self.client.pipeline()
 
         pipeline.setex(key, self.timeout, user)
-        pipeline.set(user, "PENDING")
+        pipeline.setex(user, self.timeout, "PENDING")
         pipeline.execute()
         return
 
@@ -60,22 +61,18 @@ class Matchmaker:
                 self.client.delete(unmatched_key)
                 logger.info(f"\t✅ Matched Users: {req.user} and {other_user} for {unmatched_key}!")
 
-                # Add successful match directly in the block
-                logger.info("adding successful match")
                 match_key = f"match:{req.user}:{other_user}"
                 match_data = {
                     "user_id": str(req.user),
                     "other_user_id": str(other_user),
                     "key": unmatched_key,
-                    "status": "successful",
+                    "status": "successful"
                 }
                 try:
                     pipeline = self.client.pipeline()
 
-                    pipeline.set(match_key, json.dumps(match_data))
-                    pipeline.delete(req.user)
-                    pipeline.delete(other_user)
-
+                    pipeline.setex(req.user, self.timeout, json.dumps(match_data))
+                    pipeline.setex(other_user, self.timeout, json.dumps(match_data))
                     pipeline.execute()
                     logger.info(f"Match {match_key} between {req.user} and {other_user} recorded successfully.")
                 except Exception as e:

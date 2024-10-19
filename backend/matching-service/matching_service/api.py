@@ -42,10 +42,11 @@ redis_client = Redis.from_url(match_request_redis_url)
 
 
 def request_match(publisher: Redis, req: MatchRequest):
-    existing_state = publisher.get(req.user)
+    existing_state = publisher.exists(req.user)
     logger.info("Existing state" + str(existing_state))
-    if existing_state == b"PENDING":
+    if existing_state:
         logger.info("Caught")
+        logger.info(publisher.ttl(req.user))
         raise ValueError("Existing match request")
     channel = Channels.REQUESTS.value
     publisher.publish(channel, req.model_dump_json())
@@ -55,23 +56,12 @@ def request_match(publisher: Redis, req: MatchRequest):
 # Endpoint to query matches for a user
 @app.get("/matches/{user_id}")
 async def get_matches(user_id: str):
-    pattern_user = f"match:{user_id}:*"
-    pattern_other = f"match:*:{user_id}"
-    matches = []
     try:
-        cursor = "0"
-        patterns = [pattern_user, pattern_other]
-        while cursor != 0:
-            for pattern in patterns:
-                cursor, match_keys = redis_client.scan(cursor=cursor, match=pattern)
-                for key in match_keys:
-                    match_data = redis_client.get(key)
-                    if match_data:
-                        matches.append(json.loads(match_data))
-
-        if not matches:
+        match = redis_client.get(user_id)
+        logger.info(f"Match for {user_id}: {match}")
+        if not match:
             return {"message": "No matches found"}
-        return {"matches": matches}
+        return {"matches": json.loads(match)}
     except RedisError as e:
         logger.error(f"Error while retrieving matches for {user_id}: {e}")
         raise HTTPException(
