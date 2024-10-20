@@ -57,6 +57,7 @@ def request_match(publisher: Redis, req: MatchRequest):
 async def get_matches(user_id: str):
     try:
         match = redis_client.get(user_id)
+        logger.info(f"Match for {user_id}: {match}")
         if not match:
             return {"message": "No matches found"}
         if match == b"PENDING":
