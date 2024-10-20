@@ -51,11 +51,10 @@ function MatchPage() {
       .then(data => {
         if(data.matches !== undefined) {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
+          toast.success("Match found!")
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
-        } else {
-          setStatus("Still finding")
         }
       })
       .catch(error => {
@@ -99,6 +98,7 @@ function MatchPage() {
         }
         toast.success("Match request created successfully")
         checkStatus(user.id)
+        setStatus("Still finding")
         intervalIdRef.current = setInterval(() => checkStatus(user.id), 2000);
         intervalId = setInterval(() => {
           setTime((prevTime) => prevTime + 1); // Increment time
@@ -166,7 +166,7 @@ function MatchPage() {
 
       <div className="status-display">
         <p>{status}</p>
-        {statusRef.current === 'Still finding' ? <p>Time elapsed: {time} s</p> : null}
+        {status === 'Still finding' ? <p>Time elapsed: {time} s</p> : null}
       </div>
     </div>
     </>
