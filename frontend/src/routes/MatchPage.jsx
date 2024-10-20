@@ -51,7 +51,6 @@ function MatchPage() {
       .then(data => {
         if(data.matches !== undefined) {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
-          statusRef.current = `${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`;
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
@@ -110,7 +109,6 @@ function MatchPage() {
           setTime(0);
           if (statusRef.current === "Still finding") {
             toast.warn("Could not find any match")
-            statusRef.current = 'Waiting for match request'
             setStatus('Waiting for match request');
           }
         }, 30000);
@@ -167,7 +165,7 @@ function MatchPage() {
       </div>
 
       <div className="status-display">
-        <p>{statusRef.current}</p>
+        <p>{status}</p>
         {statusRef.current === 'Still finding' ? <p>Time elapsed: {time} s</p> : null}
       </div>
     </div>
