@@ -24,7 +24,7 @@ function App() {
       </Routes>
     </Router>
     <ToastContainer
-      position='bottom-center'
+      position='top-right'
       transition={Slide}
     />
     </>

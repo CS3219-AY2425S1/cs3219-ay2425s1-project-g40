@@ -11,7 +11,7 @@ function MatchPage() {
   const [topics, setTopics] = useState([]); // State to store the fetched topics
   const [topic, setTopic] = useState("");  // State to store the selected topic
   const [difficulty, setDifficulty] = useState('Easy');
-  const [status, setStatus] = useState('Waiting for button to be pressed');
+  const [status, setStatus] = useState('Waiting for match request');
   const [time, setTime] = useState(0);
   const statusRef = useRef(status);
 
@@ -49,7 +49,7 @@ function MatchPage() {
         return response.json();
       })
       .then(data => {
-        if(typeof data.matches !== 'string') {
+        if(data.matches !== undefined) {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
@@ -82,11 +82,18 @@ function MatchPage() {
       },
       body: JSON.stringify(payload) // Convert the payload object to a JSON string
     })
-      .then(response => {
+      .then(async response => {
         if (response.status === 400) {
           toast.warn("No questions for selected difficulty and topic")
           return;
         }
+
+        if (response.status === 429) {
+          const resp = await response.json()
+          toast.warn(`Too many match requests. Try again in ${resp.detail}s`)
+          return;
+        }
+
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -102,7 +109,7 @@ function MatchPage() {
           setTime(0);
           if (statusRef.current === "Still finding") {
             toast.warn("Could not find any match")
-            setStatus('Cannot find match in time!');
+            setStatus('Waiting for match request');
           }
         }, 30000);
         return response.json(); // Assuming the server returns JSON
@@ -149,7 +156,7 @@ function MatchPage() {
 
       <div className="start">
         <button className="match-button" onClick={handleMatchClick} disabled={status === 'Still finding'}>
-          Start Match
+          Find Match
         </button>
       </div>
 
