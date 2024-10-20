@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Panel, PanelGroup } from "react-resizable-panels";
 import { toast } from 'react-toastify';
+import Navbar from '../component/navigation/NavBar';
 import CreateQuestionModal from '../component/question/CreateQuestionModal';
 import EditQuestionModal from '../component/question/EditQuestionModal';
-import Navbar from '../component/navigation/NavBar';
 import Pill from '../ui/Pill';
 import './QuestionPage.css';
 
@@ -145,8 +145,9 @@ const QuestionPage = () => {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="question-page-container">
-      <Navbar />
       <h1 className="text-3xl font-bold mb-4">Question Repository</h1>
       <div className='justify-end ml-auto m-2 space-x-2'>
         <CreateQuestionModal createQuestionHandler={handleCreateQuestion} />
@@ -230,6 +231,7 @@ const QuestionPage = () => {
         }
         </PanelGroup>
     </div>
+    </>
   );
 };
 

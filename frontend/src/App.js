@@ -5,9 +5,9 @@ import './App.css'; // Import your CSS file here
 
 import 'react-toastify/dist/ReactToastify.css';
 import LoginPage from './routes/LoginPage';
+import MatchPage from './routes/MatchPage';
 import QuestionPage from './routes/QuestionPage';
 import RegisterPage from './routes/RegisterPage';
-import MatchPage from './routes/MatchPage'
 
 
 
@@ -26,7 +26,6 @@ function App() {
     <ToastContainer
       position='bottom-center'
       transition={Slide}
-      theme='colored'
     />
     </>
   );

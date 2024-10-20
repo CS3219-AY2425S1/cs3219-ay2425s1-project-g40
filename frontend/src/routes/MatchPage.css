@@ -72,14 +72,21 @@
   .match-button:hover {
     background-color: #0056b3;
   }
-  
+
+  .match-button:disabled {
+    background-color: #adadad;
+    cursor: auto;
+  }
+
   .status-display {
     display:flex;
+    flex-direction: column;
     width:100%;
     height:20%;
     justify-content:center;
     align-items:center;
     font-size: 18px;
+    font-weight: 500;
     color: #333;
     background-color:pink;
   }

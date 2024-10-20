@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
-import './MatchPage.css';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import Navbar from '../component/navigation/NavBar';
+import './MatchPage.css';
 
 function MatchPage() {
 
@@ -49,7 +49,7 @@ function MatchPage() {
         return response.json();
       })
       .then(data => {
-        if(data.matches != undefined) {
+        if(typeof data.matches !== 'string') {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
@@ -59,8 +59,8 @@ function MatchPage() {
         }
       })
       .catch(error => {
-        setStatus("Still finding")
-        console.error(error.message);
+        setStatus("Failed to find matches")
+        toast.error(error.message);
       });
   };
 
@@ -83,9 +83,14 @@ function MatchPage() {
       body: JSON.stringify(payload) // Convert the payload object to a JSON string
     })
       .then(response => {
+        if (response.status === 400) {
+          toast.warn("No questions for selected difficulty and topic")
+          return;
+        }
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
+        toast.success("Match request created successfully")
         checkStatus(user.id)
         intervalIdRef.current = setInterval(() => checkStatus(user.id), 2000);
         intervalId = setInterval(() => {
@@ -95,27 +100,29 @@ function MatchPage() {
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
-          if (statusRef.current == "Still finding") {
-            setStatus('Match cannot find in time!');
+          if (statusRef.current === "Still finding") {
+            toast.warn("Could not find any match")
+            setStatus('Cannot find match in time!');
           }
-        }, 33000);
+        }, 30000);
         return response.json(); // Assuming the server returns JSON
       })
       .then(data => {
-        
         console.log('Success:', data); // Log success
       })
       .catch(error => {
         setStatus('Match not found!');
-        console.error('Error:', error); // Handle any errors
+        console.error(error.message)
+        toast.error('Error:', error.message); // Handle any errors
       });
 
 
   };
 
   return (
+    <>
+    <Navbar />
     <div className="match-container">
-      <Navbar />
       <div className="diff">
         <div className="form-group">
           <label>Difficulty:</label>
@@ -141,15 +148,17 @@ function MatchPage() {
       </div>
 
       <div className="start">
-        <button className="match-button" onClick={handleMatchClick}>
+        <button className="match-button" onClick={handleMatchClick} disabled={status === 'Still finding'}>
           Start Match
         </button>
       </div>
 
       <div className="status-display">
-        {status + "; Time passed since start:"+time}
+        <p>{status}</p>
+        {status === 'Still finding' ? <p>Time elapsed: {time} s</p> : null}
       </div>
     </div>
+    </>
   );
 }
 
