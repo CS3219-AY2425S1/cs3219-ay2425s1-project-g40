@@ -51,6 +51,7 @@ function MatchPage() {
       .then(data => {
         if(data.matches !== undefined) {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
+          statusRef.current = `${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`;
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
