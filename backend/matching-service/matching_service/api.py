@@ -60,8 +60,8 @@ async def get_matches(user_id: str):
         match = redis_client.get(user_id)
         logger.info(f"Match for {user_id}: {match}")
         if not match:
-            return {"message": "No matches found"}
-        return {"matches": json.loads(match)}
+            return {"matches": "No matches found"}
+        return {"matches": json.dumps(match.decode("utf-8"))}
     except RedisError as e:
         logger.error(f"Error while retrieving matches for {user_id}: {e}")
         raise HTTPException(
