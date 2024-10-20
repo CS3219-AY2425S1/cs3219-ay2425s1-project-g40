@@ -43,9 +43,8 @@ redis_client = Redis.from_url(match_request_redis_url)
 
 def request_match(publisher: Redis, req: MatchRequest):
     existing_state = publisher.exists(req.user)
-    logger.info("Existing request: " + str(existing_state))
     if existing_state:
-        logger.info(publisher.ttl(req.user))
+        logger.info("Existing request: " + str(existing_state) + "; request expiry: " + str(publisher.ttl(req.user)))
         raise ValueError(publisher.ttl(req.user))
     channel = Channels.REQUESTS.value
     publisher.publish(channel, req.model_dump_json())
