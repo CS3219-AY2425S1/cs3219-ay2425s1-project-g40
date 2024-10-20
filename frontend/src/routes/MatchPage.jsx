@@ -109,6 +109,7 @@ function MatchPage() {
           setTime(0);
           if (statusRef.current === "Still finding") {
             toast.warn("Could not find any match")
+            statusRef.current = 'Waiting for match request'
             setStatus('Waiting for match request');
           }
         }, 30000);
@@ -155,14 +156,18 @@ function MatchPage() {
       </div>
 
       <div className="start">
-        <button className="match-button" onClick={handleMatchClick} disabled={status === 'Still finding'}>
+        <button
+          className="match-button"
+          onClick={handleMatchClick}
+          disabled={statusRef.current === 'Still finding' && status === "Still finding"}
+        >
           Find Match
         </button>
       </div>
 
       <div className="status-display">
-        <p>{status}</p>
-        {status === 'Still finding' ? <p>Time elapsed: {time} s</p> : null}
+        <p>{statusRef.current}</p>
+        {statusRef.current === 'Still finding' ? <p>Time elapsed: {time} s</p> : null}
       </div>
     </div>
     </>
