@@ -1,5 +1,5 @@
 .headerStyle {
-    font-family: 'semi-bold';
+    font-family: 'monospace';
     display: inline-block; /* inline-block */
     white-space: nowrap; /* whitespace-nowrap */
     text-align: center; 
@@ -22,3 +22,21 @@
   body {
     background-color: #909497;
   }
+
+  .run-button {
+    padding: 10px 20px;
+    font-size: 20px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    width: 100%;
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+}
+
+.run-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: scale(1.05); /* Slightly grow on hover */
+}

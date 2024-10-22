@@ -46,7 +46,6 @@ body {
 
 /* Style for CodeMirror component */
 .codeMirrorStyle {
-  display:flex;
   top: 0;
   left: 0;
   width: 60vw; /* Width is 60% of the viewport width */
