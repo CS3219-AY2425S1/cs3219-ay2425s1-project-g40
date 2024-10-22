@@ -1,0 +1,24 @@
+.headerStyle {
+    font-family: 'semi-bold';
+    display: inline-block; /* inline-block */
+    white-space: nowrap; /* whitespace-nowrap */
+    text-align: center; 
+    vertical-align: baseline;
+    color:black;
+    margin-top: 20px;
+  }
+  
+  .codeMirrorStyle {
+    width: 100%; /* Full width of parent container */
+    max-width: 100vw; /* Maximum width based on viewport */
+  }
+  
+  .editor-container {
+    display: flex;
+    justify-content: center; /* Centers the editor horizontally */
+    width: 100vw;
+  }
+  
+  body {
+    background-color: #909497;
+  }
