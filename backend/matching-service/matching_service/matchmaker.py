@@ -1,5 +1,5 @@
 import json
-import time
+from secrets import token_urlsafe
 from typing import Any
 
 import structlog
@@ -62,6 +62,7 @@ class Matchmaker:
                 logger.info(f"\t✅ Matched Users: {req.user} and {other_user} for {unmatched_key}!")
 
                 match_data = {
+                    "room_token": token_urlsafe(8),
                     "user_id": str(req.user),
                     "other_user_id": str(other_user),
                     "key": unmatched_key,
