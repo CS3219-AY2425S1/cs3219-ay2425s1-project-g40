@@ -1,5 +1,5 @@
 .headerStyle {
-    font-family: 'monospace';
+    font-family: 'Inconsolata';
     display: inline-block; /* inline-block */
     white-space: nowrap; /* whitespace-nowrap */
     text-align: center; 
@@ -10,13 +10,17 @@
   
   .codeMirrorStyle {
     width: 100%; /* Full width of parent container */
-    max-width: 100vw; /* Maximum width based on viewport */
+    max-width: 60vw; /* Maximum width based on viewport */
   }
   
   .editor-container {
     display: flex;
     justify-content: center; /* Centers the editor horizontally */
     width: 100vw;
+    overflow-y: scroll;
+    max-width: 100%;
+    background: transparent;
+    padding: 10px;
   }
   
   body {
@@ -24,19 +28,46 @@
   }
 
   .run-button {
-    padding: 10px 20px;
     font-size: 20px;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
+    font-family: monospace;
+    color: #00FF00;
+    border: #11a91b;
+    background-color: #2e2e2e;
+    border-style: solid;
+    border-width: thin;
+    padding: 15px;
     cursor: pointer;
-    margin-bottom: 20px;
     width: 100%;
     transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
 }
 
 .run-button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-    transform: scale(1.05); /* Slightly grow on hover */
+  background-color: #11a91b;
+}
+
+.terminal-container .terminal {
+  display: block;
+  position: relative;
+  background-color: black;
+  backdrop-filter: blur(var(--blur-size));
+  border: 1px solid black;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px black;
+  margin-top: 10px; /* Space between the editor and output */
+  height: 100px; /* Fixed height */
+  overflow-y: auto; /* Enable vertical scroll */
+}
+
+.terminal-container .terminal .command-line {
+  display: block;
+  padding: 5px;
+  text-align: left;
+  font-family: 'PT Mono', monospace;
+  font-size: 14px;
+  color: white;
+  opacity: 1;
+  transition: opacity 1s;
+  background-color: black; /* Terminal background */
+  border-radius: 5px;
+  padding: 10px; /* Padding inside the command line */
 }

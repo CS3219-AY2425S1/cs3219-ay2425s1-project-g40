@@ -61,10 +61,16 @@ function CollabPage() {
                         className="codeMirrorStyle"
                     />
                     <button onClick={runCode} className="run-button">Run Code</button>
-                    <div className="output">
-                        <h3>Output:</h3>
-                        <pre>{output}</pre>
+
+                    <div className="terminal-container">
+                        <div className="terminal">
+                            <div className="command-line">
+                                <h3>Output:</h3>
+                                <pre>{output}</pre>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </>
