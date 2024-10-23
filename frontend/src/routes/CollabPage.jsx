@@ -20,14 +20,15 @@ function CollabPage() {
         const loadPyodide = async () => {
             const pyodideInstance = await window.loadPyodide({
                 indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/',
-                stdout: (text) => setOutput(prevOutput => prevOutput + text), // Append stdout output
-                stderr: (text) => setOutput(prevOutput => prevOutput + `Error: ${text}`) // Append stderr output
+                stdout: (text) => setOutput(prevOutput => prevOutput + text + "\n"), // Add a newline
+                stderr: (text) => setOutput(prevOutput => prevOutput + `Error: ${text}\n`) // Add a newline for errors
             });
             setPyodide(pyodideInstance);
         };
-
+    
         loadPyodide();
     }, []);
+    
 
     const runCode = () => {
         if (pyodide) {
