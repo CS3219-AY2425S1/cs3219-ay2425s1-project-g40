@@ -50,29 +50,35 @@ function CollabPage() {
     return (
         <>
             <Navbar />
-            <div className="editor-container">
-                <div>
-                    <div className="headerStyle">Let's Collaborate!</div>
-                    <CodeMirror
-                        value={code}
-                        onChange={(value) => setCode(value)}  // Update code on change
-                        theme={vscodeDark}
-                        extensions={[python()]}
-                        className="codeMirrorStyle"
-                    />
-                    <button onClick={runCode} className="run-button">Run Code</button>
-
-                    <div className="terminal-container">
-                        <div className="terminal">
-                            <div className="command-line">
-                                <h3>Output:</h3>
-                                <pre>{output}</pre>
+                <div className="editor-container">
+                    <div>
+                        <div className="headerStyle">Let's Collaborate!</div>
+                        
+                        <div className="editor-section">
+                            <CodeMirror
+                                value={code}
+                                onChange={(value) => setCode(value)}  // Update code on change
+                                theme={vscodeDark}
+                                extensions={[python()]}
+                                className="codeMirrorStyle"
+                            />
+                            <div className="run-button-container">
+                                <button onClick={runCode} className="run-button">Run Code</button>
                             </div>
                         </div>
-                    </div>
 
+                        <div className="terminal-container">
+                            <div className="terminal">
+                                <div className="command-line">
+                                <h3>Output:</h3>
+                                <pre>{output}</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
+
         </>
     );
 }

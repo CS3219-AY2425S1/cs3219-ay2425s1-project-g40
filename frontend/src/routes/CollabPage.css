@@ -1,3 +1,7 @@
+body {
+  background-color: #909497;
+}
+
 .headerStyle {
     font-family: 'Inconsolata';
     display: inline-block; /* inline-block */
@@ -8,23 +12,32 @@
     margin-top: 20px;
   }
   
-  .codeMirrorStyle {
-    width: 100%; /* Full width of parent container */
-    max-width: 60vw; /* Maximum width based on viewport */
-  }
-  
   .editor-container {
     display: flex;
-    justify-content: center; /* Centers the editor horizontally */
-    width: 100vw;
-    overflow-y: scroll;
-    max-width: 100%;
-    background: transparent;
-    padding: 10px;
+    justify-content: center; /* Center horizontally */
+    padding: 20px;
+  }
+
+  .editor-section {
+    justify-content: space-between; /* Pushes the button to the right */
+    align-items: center; /* Vertically aligns the button with the editor */
+    margin-top: 20px;
   }
   
-  body {
-    background-color: #909497;
+  .codeMirrorStyle {
+    width: 100vw; /* Set a fixed width based on viewport */
+    max-width: 90vw; /* Max width based on viewport */
+    height: 800px;
+    max-height: 800px;
+    overflow-y: auto; /* Enable vertical scroll */
+  }
+  
+
+  .run-button-container {
+    display: flex;
+    justify-content: flex-end; /* Align the button to the right */
+    width: 100%; /* Full width for the container */
+    margin-top: 10px; /* Space above the button */
   }
 
   .run-button {
@@ -37,14 +50,12 @@
     border-width: thin;
     padding: 15px;
     cursor: pointer;
-    width: 100%;
     transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
-}
-
-.run-button:hover {
-  background-color: #11a91b;
-}
-
+  }
+  
+  .run-button:hover {
+    background-color: #11a91b;
+  }
 .terminal-container .terminal {
   display: block;
   position: relative;
@@ -54,8 +65,10 @@
   border-radius: 5px;
   box-shadow: 0px 0px 10px black;
   margin-top: 10px; /* Space between the editor and output */
-  height: 100px; /* Fixed height */
+  height: 200px; /* Fixed height */
   overflow-y: auto; /* Enable vertical scroll */
+  width: 100vw; /* Set a fixed width based on viewport */
+  max-width: 90vw; /* Max width based on viewport */
 }
 
 .terminal-container .terminal .command-line {
