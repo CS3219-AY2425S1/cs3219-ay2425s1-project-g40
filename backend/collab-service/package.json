@@ -1,0 +1,39 @@
+{
+  "engines": {
+    "node": ">=20.17.0"
+  },
+  "name": "collab-service",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "_moduleAliases": {
+    "@": "dist"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "npm run build && nodemon --watch 'src/**/*' -e ts,tsx --exec 'ts-node' ./src/index.ts",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^22.7.9",
+    "concurrently": "^9.0.1",
+    "module-alias": "^2.2.3",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "http-status-codes": "^2.3.0",
+    "pino": "^9.5.0"
+  }
+}
