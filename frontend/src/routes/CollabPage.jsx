@@ -9,6 +9,11 @@ import { socket } from '../collab/socket';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
 
+const CLEAR_INTERPRETER = `
+globals().clear()
+
+`
+
 function CollabPage() {
     const user = JSON.parse(localStorage.getItem('user'));
     const [pyodide, setPyodide] = useState(null);
@@ -61,7 +66,7 @@ function CollabPage() {
             // Clear previous output
             setOutput('');
             try {
-                const result = pyodide.runPython(code); // Run Python code
+                const result = pyodide.runPython(CLEAR_INTERPRETER + code); // Run Python code
                 if (result) {
                     setOutput(prevOutput => prevOutput + result); // Append result if there is one
                 }
