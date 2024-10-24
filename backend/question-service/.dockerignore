@@ -1,0 +1,19 @@
+# Reference : https://gist.github.com/KernelA/04b4d7691f28e264f72e76cfd724d448
+
+# Docker
+docker-compose.yml
+Dockerfile
+.docker
+.dockerignore
+
+# Compiled
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.env
+.venv/
+venv/
+env/
+

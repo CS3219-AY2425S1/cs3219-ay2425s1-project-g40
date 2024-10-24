@@ -1,0 +1,24 @@
+syntax = "proto3";
+package question;
+
+service Question {
+  rpc Ping (PingRequest) returns (PingReply) {}
+  rpc QuestionsExists(QuestionsExistsRequest) returns (QuestionsExistsReply) {} 
+}
+
+message PingRequest {
+  string name = 1;
+}
+
+message PingReply {
+  string message = 1;
+}
+
+message QuestionsExistsRequest {
+  optional string difficulty = 1;
+  optional string topic = 2;
+}
+
+message QuestionsExistsReply {
+  int32 numQuestions = 1;
+}
