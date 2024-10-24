@@ -1,11 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import CodeMirror from "@uiw/react-codemirror";
+import { python } from '@codemirror/lang-python';
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
-import { python } from '@codemirror/lang-python'; 
+import CodeMirror from "@uiw/react-codemirror";
+import React, { useEffect, useState } from 'react';
 // import { loadPyodide } from 'pyodide';
 import { toast } from 'react-toastify';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
+
+const CLEAR_INTERPRETER = `
+globals().clear()
+
+`
 
 function CollabPage() {
 
@@ -35,7 +40,7 @@ function CollabPage() {
             // Clear previous output
             setOutput('');
             try {
-                const result = pyodide.runPython(code); // Run Python code
+                const result = pyodide.runPython(CLEAR_INTERPRETER + code); // Run Python code
                 if (result) {
                     setOutput(prevOutput => prevOutput + result); // Append result if there is one
                 }
