@@ -1,9 +1,11 @@
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { basicSetup } from "@uiw/react-codemirror";
 import React, { useEffect, useState } from 'react';
 // import { loadPyodide } from 'pyodide';
 import { toast } from 'react-toastify';
+import { getDocument, peerExtension } from '../collab/collabExtension';
+import { socket } from '../collab/socket';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
 
@@ -13,27 +15,51 @@ globals().clear()
 `
 
 function CollabPage() {
-
-
+    const user = JSON.parse(localStorage.getItem('user'));
     const [pyodide, setPyodide] = useState(null);
     const [output, setOutput] = useState('');
-    const [code, setCode] = useState("print('Hello World!')");
+    const [isConnected, setIsConnected] = useState(false)
+    const [version, setVersion] = useState(null);
+    const [code, setCode] = useState(null);
 
-
-    // Load Pyodide when component mounts
     useEffect(() => {
-        const loadPyodide = async () => {
-            const pyodideInstance = await window.loadPyodide({
-                indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/',
-                stdout: (text) => setOutput(prevOutput => prevOutput + text + "\n"), // Add a newline
-                stderr: (text) => setOutput(prevOutput => prevOutput + `Error: ${text}\n`) // Add a newline for errors
-            });
-            setPyodide(pyodideInstance);
+        socket.connect()
+        const fetchData = async () => {
+          const { version, doc } = await getDocument(socket);
+          setVersion(version);
+          setCode(doc.toString());
         };
+        
+        fetchData();
     
-        loadPyodide();
-    }, []);
+        const handleConnect = () => setIsConnected(true);
+        const handleDisconnect = () => setIsConnected(false);
     
+        socket.on('connect', handleConnect);
+        socket.on('disconnect', handleDisconnect);
+
+    
+        return () => {
+          socket.off('connect', handleConnect);
+          socket.off('disconnect', handleDisconnect);
+        };
+      }, []);
+
+    /**
+     * Pyodide doesnt seem to work when i add websockets
+     */
+    // useEffect(() => {
+    //     const loadPyodide = async () => {
+    //         const pyodideInstance = await window.loadPyodide({
+    //             indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/',
+    //             stdout: (text) => setOutput(prevOutput => prevOutput + text + "\n"), // Add a newline
+    //             stderr: (text) => setOutput(prevOutput => prevOutput + `Error: ${text}\n`) // Add a newline for errors
+    //         });
+    //         setPyodide(pyodideInstance);
+    //     };
+    
+    //     loadPyodide();
+    // }, []);
 
     const runCode = () => {
         if (pyodide) {
@@ -58,16 +84,27 @@ function CollabPage() {
             <Navbar />
                 <div className="editor-container">
                     <div>
-                        <div className="headerStyle">Let's Collaborate!</div>
+                        <div className="headerStyle">Let's Collaborate!
+                        {isConnected ? <p>Connected</p> : <p>Not connected</p>}
+                        </div>
                         
                         <div className="editor-section">
-                            <CodeMirror
-                                value={code}
-                                onChange={(value) => setCode(value)}  // Update code on change
-                                theme={vscodeDark}
-                                extensions={[python()]}
-                                className="codeMirrorStyle"
-                            />
+                            {code !== null && version !== null ?
+                                <CodeMirror
+                                    value={code}
+                                    theme={vscodeDark}
+                                    basicSetup={false}
+                                    id="codeEditor"
+                                    extensions={[
+                                        basicSetup(),
+                                        python(),
+                                        peerExtension(version, socket, user.id)
+                                    ]}
+                                    className="codeMirrorStyle"
+                                /> : (
+                                    <p>Loading</p>
+                                )
+                            }
                             <div className="run-button-container">
                                 <button onClick={runCode} className="run-button">Run Code</button>
                             </div>

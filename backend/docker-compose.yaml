@@ -65,12 +65,28 @@ services:
     ports:
       - "8002:8000"
   matching-worker:
-      depends_on:
-        - matchmaker-redis
-      build:
-        context: ./matching-service
-        dockerfile: Dockerfile
-      command: make matchmaker
-      environment:
-        - REDIS_HOST=matchmaker-redis
-        - REDIS_PORT=6379
+    depends_on:
+      - matchmaker-redis
+    build:
+      context: ./matching-service
+      dockerfile: Dockerfile
+    command: make matchmaker
+    environment:
+      - REDIS_HOST=matchmaker-redis
+      - REDIS_PORT=6379
+
+  # collab service
+  collab-redis:
+    image: redis:alpine3.20
+    ports:
+      - "6740:6739"
+  collab-service:
+    build:
+      context: ./collab-service
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8000
+      - REDIS_HOST=collab-redis
+      - REDIS_PORT=6379
+    ports:
+      - "8003:8000"
