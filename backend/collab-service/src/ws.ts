@@ -23,6 +23,10 @@ const REDIS_HOST = process.env.REDIS_HOST || "localhost"
  */
 
 const pubClient = new Redis(REDIS_PORT, REDIS_HOST)
+pubClient.on("error", (err) => {
+  console.log("🛑 Something went wrong with Redis. Exiting....")
+  process.exit()
+})
 const subClient = pubClient.duplicate()
 
 const wsServer = http.createServer();
