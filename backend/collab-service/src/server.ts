@@ -12,9 +12,9 @@ app.use(cors());
 app.options("*", cors())
 app.use(corsHandler)
 
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/ping", (req: Request, res: Response, next: NextFunction) => {
   res.json({
-    message: "Hello from collab-service!"
+    message: "pong"
   })
 })
 
