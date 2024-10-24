@@ -2,6 +2,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import http from "http";
 import { Redis } from "ioredis";
 import { Server as SocketIoServer } from "socket.io";
+import { handleConnection } from "./handler/wsEventHander";
 import app from "./server";
 
 const REDIS_PORT = process.env.REDIS_PORT ? +process.env.REDIS_PORT : 6379
@@ -22,6 +23,7 @@ const ws = new SocketIoServer(wsServer, {
 
 ws.on("connection", (socket) => {
   console.log(`User connected! ${socket.id}`)
+  handleConnection(socket);
 })
 
 
