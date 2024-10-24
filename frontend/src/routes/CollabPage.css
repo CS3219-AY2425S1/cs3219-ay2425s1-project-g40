@@ -30,6 +30,7 @@ body {
   }
   
   .codeMirrorStyle {
+    background-color: #1e1e1e;
     width: 100vw; /* Set a fixed width based on viewport */
     max-width: 90vw; /* Max width based on viewport */
     height: 800px;
