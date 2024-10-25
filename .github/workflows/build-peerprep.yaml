@@ -1,0 +1,61 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  REPO: cs3219-ay2425s1/cs3219-ay2425s1-project-g40
+  LATEST_TAG: latest
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    strategy:
+      matrix:
+        service:
+          - name: user-service
+            context: "{{defaultContext}}:/backend/user-service"
+          - name: question-service
+            context: "{{defaultContext}}:/backend/question-service"
+          - name: matching-service
+            context: "{{defaultContext}}:/backend/matching-service"
+          - name: collab-service
+            context: "{{defaultContext}}:/backend/collab-service"
+          - name: peerprep-frontend
+            context: "{{defaultContext}}:/frontend"
+          # Add additional services as needed
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          context: ${{ matrix.service.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
