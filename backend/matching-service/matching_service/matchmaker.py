@@ -67,6 +67,8 @@ class Matchmaker:
                     "other_user_id": str(other_user),
                     "key": unmatched_key,
                     "status": "successful",
+                    "difficulty": req.difficulty.value,
+                    "topic": req.topic,
                 }
                 try:
                     pipeline = self.client.pipeline()

@@ -11,7 +11,7 @@ from matching_service.config import RedisSettings
 
 from .common import Difficulty
 from .config import Channels, settings
-from .grpc import query_num_questions
+from .grpc import get_one_question, query_num_questions
 
 structlog.configure(
     processors=[
@@ -61,7 +61,14 @@ async def get_matches(user_id: str):
             return {"message": "No matches found"}
         if match == b"PENDING":
             return {"message": "No matches found"}
-        return {"matches": json.loads(match.decode("utf-8"))}
+
+        match_data = json.loads(match.decode("utf-8"))
+        question = get_one_question(topic=match_data["topic"], difficulty=match_data["difficulty"])
+        match_data.update({"question": question})
+        return {"matches": match_data}
+    except KeyError as e:
+        logger.error(f"Something went wrong: {e}\n{match_data}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unknown error occurred.")
     except RedisError as e:
         logger.error(f"Error while retrieving matches for {user_id}: {e}")
         raise HTTPException(

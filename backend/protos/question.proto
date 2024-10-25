@@ -4,6 +4,7 @@ package question;
 service Question {
   rpc Ping (PingRequest) returns (PingReply) {}
   rpc QuestionsExists(QuestionsExistsRequest) returns (QuestionsExistsReply) {} 
+  rpc GetOneQuestion(QuestionRequest) returns (QuestionReply) {}
 }
 
 message PingRequest {
@@ -21,4 +22,17 @@ message QuestionsExistsRequest {
 
 message QuestionsExistsReply {
   int32 numQuestions = 1;
+}
+
+message QuestionRequest {
+  optional string difficulty = 1;
+  optional string topic = 2;
+}
+
+message QuestionReply {
+  string title = 1;
+  string titleSlug = 2;
+  string difficulty = 3;
+  string topic = 4;
+  string description = 5;
 }
