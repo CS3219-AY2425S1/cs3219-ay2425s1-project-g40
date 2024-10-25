@@ -11,7 +11,6 @@ import QuestionPage from './routes/QuestionPage';
 import RegisterPage from './routes/RegisterPage';
 
 
-
 function App() {
   return (
     <>
