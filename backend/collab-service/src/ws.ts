@@ -39,7 +39,7 @@ const ws = new SocketIoServer(wsServer, {
 /**
  * TODO
  * 
- * - Different docs from different rooms?
+ * - Store and retrieve room data from Redis instead
  */
 type RoomData = {
   updates: Update[];
@@ -54,20 +54,15 @@ const initRoom = (roomId: string): void => {
     roomData[roomId] = {
       updates: [],
       code: Text.of([`print("Hello room ${roomId}")`]),
+      /**
+       * Stores callback functions that is executed when new updates are available
+       * - Updated in pullUpdates
+       * - Called in pushUpdates
+       */
       pending: []
     }
   }
 }
-
-let updates: Update[] = []
-let code = Text.of([`print("Hello world!")`])
-
-/**
- * Stores callback functions that is executed when new updates are available
- * - Updated in pullUpdates
- * - Called in pushUpdates
- */
-let pending: ((value: any) => void)[] = []
 
 ws.on("connection", (socket) => {
   log('User connected!')
