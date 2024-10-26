@@ -3,6 +3,7 @@ import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import CodeMirror, { basicSetup } from "@uiw/react-codemirror";
 import React, { useEffect, useState } from 'react';
 // import { loadPyodide } from 'pyodide';
+import { useParams } from 'react-router';
 import { toast } from 'react-toastify';
 import { getDocument, peerExtension } from '../collab/collabExtension';
 import { socket } from '../collab/socket';
@@ -16,6 +17,7 @@ globals().clear()
 
 function CollabPage() {
     const user = JSON.parse(localStorage.getItem('user'));
+    const { room_token } = useParams();
     const [pyodide, setPyodide] = useState(null);
     const [output, setOutput] = useState('');
     const [isConnected, setIsConnected] = useState(false)
@@ -25,23 +27,30 @@ function CollabPage() {
     useEffect(() => {
         socket.connect()
         const fetchData = async () => {
-          const { version, doc } = await getDocument(socket);
+          const { version, doc } = await getDocument(socket, room_token);
           setVersion(version);
           setCode(doc.toString());
         };
         
         fetchData();
     
-        const handleConnect = () => setIsConnected(true);
+        const handleConnect = () => {
+          setIsConnected(true);
+          socket.emit('joinRoom', room_token, user.id)
+        }
         const handleDisconnect = () => setIsConnected(false);
-    
+        const handlePeerJoined = (userId) => {
+            toast.info(`User ${userId} has joined the room!`)
+        }
+
         socket.on('connect', handleConnect);
         socket.on('disconnect', handleDisconnect);
-
+        socket.on('joinedRoom', handlePeerJoined)
     
         return () => {
           socket.off('connect', handleConnect);
           socket.off('disconnect', handleDisconnect);
+          socket.off('joinedRoom', handlePeerJoined);
         };
       }, []);
 
@@ -98,7 +107,7 @@ function CollabPage() {
                                     extensions={[
                                         basicSetup(),
                                         python(),
-                                        peerExtension(version, socket, user.id)
+                                        peerExtension(version, socket, room_token, user.id)
                                     ]}
                                     className="codeMirrorStyle"
                                 /> : (

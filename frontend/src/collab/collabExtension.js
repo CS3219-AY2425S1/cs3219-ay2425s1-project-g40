@@ -19,15 +19,15 @@ import { ViewPlugin } from "@codemirror/view";
 const pushUpdates = (
 	socket,
 	version,
-	allUpdates
+	allUpdates,
+  room_token
 ) => {
 	const updates = allUpdates.map(u => ({
 		clientID: u.clientID,
 		changes: u.changes.toJSON(),
 	}))
-
 	return new Promise(function(resolve) {
-		socket.emit('pushUpdates', version, JSON.stringify(updates));
+		socket.emit('pushUpdates', room_token, version, JSON.stringify(updates));
 		socket.once('pushUpdateResponse', (status) => {
 			resolve(status);
 		});
@@ -36,10 +36,11 @@ const pushUpdates = (
 
 const pullUpdates = async (
 	socket,
-	version 
+	version,
+  room_token
 ) => {
 	return new Promise(function(resolve) {
-		socket.emit('pullUpdates', version);
+		socket.emit('pullUpdates', room_token, version);
 		socket.once('pullUpdateResponse', (updates) => {
 			resolve(JSON.parse(updates));
 		});
@@ -49,9 +50,9 @@ const pullUpdates = async (
 	})));
 }
 
-export const getDocument = (socket) => {
+export const getDocument = (socket, room_token) => {
 	return new Promise(function(resolve) {
-		socket.emit('getDocument');
+		socket.emit('getDocument', room_token);
 
 		socket.once('getDocumentResponse', (version, doc) => {
 			resolve({
@@ -62,7 +63,7 @@ export const getDocument = (socket) => {
 	});
 }
 
-export function peerExtension(startVersion, connection, me) {
+export function peerExtension(startVersion, connection, room_token, me) {
   const plugin = ViewPlugin.fromClass(class {
     constructor(view) {
       this.view = view
@@ -80,7 +81,7 @@ export function peerExtension(startVersion, connection, me) {
       if (this.pushing || !updates.length) return
       this.pushing = true
       const version = getSyncedVersion(this.view.state)
-      await pushUpdates(connection, version, updates)
+      await pushUpdates(connection, version, updates, room_token)
       this.pushing = false
       // Regardless of whether the push failed or new updates came in
       // while it was running, try again if there's updates remaining
@@ -91,7 +92,7 @@ export function peerExtension(startVersion, connection, me) {
     async pull() {
       while (!this.done) {
         const version = getSyncedVersion(this.view.state)
-        const updates = await pullUpdates(connection, version)
+        const updates = await pullUpdates(connection, version, room_token)
         this.view.dispatch(receiveUpdates(this.view.state, updates))
       }
     }
