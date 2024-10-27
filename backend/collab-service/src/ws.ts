@@ -14,6 +14,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import http from "http";
 import { Redis } from "ioredis";
 import { Server as SocketIoServer } from "socket.io";
+import log from "./logger";
 
 const REDIS_PORT = process.env.REDIS_PORT ? +process.env.REDIS_PORT : 6379
 const REDIS_HOST = process.env.REDIS_HOST || "localhost"
@@ -24,7 +25,7 @@ const REDIS_HOST = process.env.REDIS_HOST || "localhost"
 
 const pubClient = new Redis(REDIS_PORT, REDIS_HOST)
 pubClient.on("error", (err) => {
-  console.log("🛑 Something went wrong with Redis. Exiting....")
+  log("🛑 Something went wrong with Redis. Exiting....")
   process.exit()
 })
 const subClient = pubClient.duplicate()
@@ -38,48 +39,71 @@ const ws = new SocketIoServer(wsServer, {
 /**
  * TODO
  * 
- * - Different docs from different rooms?
+ * - Store and retrieve room data from Redis instead
  */
-let updates: Update[] = []
-let code = Text.of([`print("Hello world!")`])
+type RoomData = {
+  updates: Update[];
+  code: Text;
+  pending: ((value: any) => void)[]
+}
 
-/**
- * Stores callback functions that is executed when new updates are available
- * - Updated in pullUpdates
- * - Called in pushUpdates
- */
-let pending: ((value: any) => void)[] = []
+const roomData: Record<string, RoomData> = {}
+
+const initRoom = (roomId: string): void => {
+  if (!roomData[roomId]) {
+    roomData[roomId] = {
+      updates: [],
+      code: Text.of([`print("Hello room ${roomId}")`]),
+      /**
+       * Stores callback functions that is executed when new updates are available
+       * - Updated in pullUpdates
+       * - Called in pushUpdates
+       */
+      pending: []
+    }
+  }
+}
 
 ws.on("connection", (socket) => {
-  console.log(`User connected! ${socket.id}`)
+  log('User connected!')
 
-  socket.on("getDocument", () => {
-    console.log("Received getDocument...")
-		socket.emit("getDocumentResponse", updates.length, code.toString());
+  socket.on("joinRoom", (roomId: string, userId: string) => {
+    socket.join(roomId);
+    log(`${userId} joined room: ${roomId}`);
+    initRoom(roomId);
+    socket.broadcast.to(roomId).emit("joinedRoom", userId); // notify all that userId joined roomId
+  })
+
+  socket.on("getDocument", (roomId: string) => {
+    initRoom(roomId);
+    const room = roomData[roomId]
+    log(`Received getDocument for room ${roomId}...`)
+		socket.emit("getDocumentResponse", room.updates.length, room.code.toString());
 	})
 
-	socket.on('pushUpdates', (version, codeUpdates) => {
-    console.log("Received pushUpdate...")
+	socket.on('pushUpdates', (roomId, version, codeUpdates) => {
+    initRoom(roomId)
+    const room = roomData[roomId]
+    log(`Room ${roomId} received pushUpdates...`)
 		codeUpdates = JSON.parse(codeUpdates);
 		try {
-			if (version != updates.length) {
+			if (version != room.updates.length) {
 				socket.emit('pushUpdateResponse', false);
 			} else {
 				for (let update of codeUpdates) {
 					let changes = ChangeSet.fromJSON(update.changes)
-					updates.push({changes, clientID: update.clientID})
-					console.log("Applying changes...", updates.length)
-          code = changes.apply(code)
+					room.updates.push({changes, clientID: update.clientID})
+          room.code = changes.apply(room.code)
 				}
 				socket.emit('pushUpdateResponse', true);
-				while (pending.length) pending.pop()!(updates)
+				while (room.pending.length) room.pending.pop()!(room.updates)
 			}
 		} catch (error) {
 			console.error(error)
 		}
 	})
 
-  socket.on('pullUpdates', (version: number) => {
+  socket.on('pullUpdates', (roomId:string, version: number) => {
     /**
      * Client is requesting updates starting from `version`
      * 
@@ -87,13 +111,19 @@ ws.on("connection", (socket) => {
      * Else, there are no new updates. Callback fn is stored in the pending array
      * - Callback fn is called in pushUpdateHandler
      */
-    console.log("Received pullUpdate", version, updates.length)
-		if (version < updates.length) {
-			socket.emit("pullUpdateResponse", JSON.stringify(updates.slice(version)))
+    initRoom(roomId)
+    const room = roomData[roomId]
+    log(`Room ${roomId} received pullUpdates...`)
+		if (version < room.updates.length) {
+			socket.emit("pullUpdateResponse", JSON.stringify(room.updates.slice(version)))
 		} else {
-			pending.push((updates) => { socket.emit('pullUpdateResponse', JSON.stringify(updates.slice(version))) });
+			room.pending.push((updates) => { socket.emit('pullUpdateResponse', JSON.stringify(room.updates.slice(version))) });
 		}
 	})
+
+  socket.on("disconnecting", () => {
+    log(`User ${socket.id} is disconnecting from rooms: ${Array.from(socket.rooms)}`);
+  });
 })
 
 export default wsServer;
