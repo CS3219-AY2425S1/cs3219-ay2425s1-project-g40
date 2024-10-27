@@ -49,6 +49,12 @@ class QuestionStub(object):
             response_deserializer=question__pb2.QuestionsExistsReply.FromString,
             _registered_method=True,
         )
+        self.GetOneQuestion = channel.unary_unary(
+            "/question.Question/GetOneQuestion",
+            request_serializer=question__pb2.QuestionRequest.SerializeToString,
+            response_deserializer=question__pb2.QuestionReply.FromString,
+            _registered_method=True,
+        )
 
 
 class QuestionServicer(object):
@@ -66,6 +72,12 @@ class QuestionServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def GetOneQuestion(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_QuestionServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -78,6 +90,11 @@ def add_QuestionServicer_to_server(servicer, server):
             servicer.QuestionsExists,
             request_deserializer=question__pb2.QuestionsExistsRequest.FromString,
             response_serializer=question__pb2.QuestionsExistsReply.SerializeToString,
+        ),
+        "GetOneQuestion": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOneQuestion,
+            request_deserializer=question__pb2.QuestionRequest.FromString,
+            response_serializer=question__pb2.QuestionReply.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler("question.Question", rpc_method_handlers)
@@ -138,6 +155,36 @@ class Question(object):
             "/question.Question/QuestionsExists",
             question__pb2.QuestionsExistsRequest.SerializeToString,
             question__pb2.QuestionsExistsReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True,
+        )
+
+    @staticmethod
+    def GetOneQuestion(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/question.Question/GetOneQuestion",
+            question__pb2.QuestionRequest.SerializeToString,
+            question__pb2.QuestionReply.FromString,
             options,
             channel_credentials,
             insecure,

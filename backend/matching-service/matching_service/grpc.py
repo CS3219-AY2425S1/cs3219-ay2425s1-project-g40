@@ -15,3 +15,16 @@ def query_num_questions(topic: str, difficulty: Difficulty) -> int:
         stub = pb2_grpc.QuestionStub(channel)
         response = stub.QuestionsExists(pb2.QuestionsExistsRequest(difficulty=difficulty.value, topic=topic))
         return response.numQuestions
+
+
+def get_one_question(topic: str, difficulty: Difficulty) -> dict:
+    with grpc.insecure_channel(settings.QUESTIONS_GRPC) as channel:
+        stub = pb2_grpc.QuestionStub(channel)
+        response: pb2.QuestionReply = stub.GetOneQuestion(pb2.QuestionRequest(difficulty=difficulty, topic=topic))
+        return {
+            "title": response.title,
+            "titleSlug": response.titleSlug,
+            "difficulty": response.difficulty,
+            "topic": response.topic,
+            "description": response.description,
+        }

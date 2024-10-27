@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0equestion.proto\x12\x08question\"\x1b\n\x0bPingRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1c\n\tPingReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"^\n\x16QuestionsExistsRequest\x12\x17\n\ndifficulty\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x12\n\x05topic\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\r\n\x0b_difficultyB\x08\n\x06_topic\",\n\x14QuestionsExistsReply\x12\x14\n\x0cnumQuestions\x18\x01 \x01(\x05\x32\x97\x01\n\x08Question\x12\x34\n\x04Ping\x12\x15.question.PingRequest\x1a\x13.question.PingReply\"\x00\x12U\n\x0fQuestionsExists\x12 .question.QuestionsExistsRequest\x1a\x1e.question.QuestionsExistsReply\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0equestion.proto\x12\x08question\"\x1b\n\x0bPingRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1c\n\tPingReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"^\n\x16QuestionsExistsRequest\x12\x17\n\ndifficulty\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x12\n\x05topic\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\r\n\x0b_difficultyB\x08\n\x06_topic\",\n\x14QuestionsExistsReply\x12\x14\n\x0cnumQuestions\x18\x01 \x01(\x05\"W\n\x0fQuestionRequest\x12\x17\n\ndifficulty\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x12\n\x05topic\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\r\n\x0b_difficultyB\x08\n\x06_topic\"i\n\rQuestionReply\x12\r\n\x05title\x18\x01 \x01(\t\x12\x11\n\ttitleSlug\x18\x02 \x01(\t\x12\x12\n\ndifficulty\x18\x03 \x01(\t\x12\r\n\x05topic\x18\x04 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t2\xdf\x01\n\x08Question\x12\x34\n\x04Ping\x12\x15.question.PingRequest\x1a\x13.question.PingReply\"\x00\x12U\n\x0fQuestionsExists\x12 .question.QuestionsExistsRequest\x1a\x1e.question.QuestionsExistsReply\"\x00\x12\x46\n\x0eGetOneQuestion\x12\x19.question.QuestionRequest\x1a\x17.question.QuestionReply\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -39,6 +39,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_QUESTIONSEXISTSREQUEST']._serialized_end=181
   _globals['_QUESTIONSEXISTSREPLY']._serialized_start=183
   _globals['_QUESTIONSEXISTSREPLY']._serialized_end=227
-  _globals['_QUESTION']._serialized_start=230
-  _globals['_QUESTION']._serialized_end=381
+  _globals['_QUESTIONREQUEST']._serialized_start=229
+  _globals['_QUESTIONREQUEST']._serialized_end=316
+  _globals['_QUESTIONREPLY']._serialized_start=318
+  _globals['_QUESTIONREPLY']._serialized_end=423
+  _globals['_QUESTION']._serialized_start=426
+  _globals['_QUESTION']._serialized_end=649
 # @@protoc_insertion_point(module_scope)

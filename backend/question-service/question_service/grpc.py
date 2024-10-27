@@ -1,3 +1,4 @@
+import random
 from concurrent import futures
 
 import structlog
@@ -28,8 +29,25 @@ class QuestionGrpc(pb2_grpc.QuestionServicer):
     ) -> pb2.QuestionsExistsReply:
         questions = await get_questions(topic=request.topic, difficulty=request.difficulty)
         num_questions = len(questions)
-        logger.info(f"[question-grpc] questionExists: {request.topic}, {request.difficulty}: {num_questions} found!")
+        logger.info(f"[question-grpc] QuestionExists: {request.topic}, {request.difficulty}: {num_questions} found!")
         return pb2.QuestionsExistsReply(numQuestions=num_questions)
+
+    async def GetOneQuestion(
+        self, request: pb2.QuestionRequest, context: grpc.aio.ServicerContext
+    ) -> pb2.QuestionReply:
+        questions = await get_questions(topic=request.topic, difficulty=request.difficulty)
+        logger.info(f"[question-grpc] choosing a rand question out of {len(questions)} question(s)")
+        question = random.choice(questions)
+        logger.info(
+            f"[question-grpc] GetOneQuestion: Returning {question.title}: {question.difficulty.value}:{question.topic}"
+        )
+        return pb2.QuestionReply(
+            title=question.title,
+            titleSlug=question.titleSlug,
+            difficulty=question.difficulty.value,
+            topic=question.topic,
+            description=question.description,
+        )
 
 
 async def serve() -> None:
