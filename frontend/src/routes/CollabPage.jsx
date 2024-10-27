@@ -1,136 +1,152 @@
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import CodeMirror, { basicSetup } from "@uiw/react-codemirror";
-import React, { useEffect, useState } from 'react';
-// import { loadPyodide } from 'pyodide';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router';
 import { toast } from 'react-toastify';
 import { getDocument, peerExtension } from '../collab/collabExtension';
 import { socket } from '../collab/socket';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
+import { debounce } from 'lodash';
 
 const CLEAR_INTERPRETER = `
 globals().clear()
-
 `
+
+// Output console component to render the output separately
+const OutputConsole = ({ output }) => (
+    <div className="terminal">
+        <div className="command-line">
+            <h3>Output:</h3>
+            <pre>{output}</pre>
+        </div>
+    </div>
+);
 
 function CollabPage() {
     const user = JSON.parse(localStorage.getItem('user'));
     const { room_token } = useParams();
-    const [pyodide, setPyodide] = useState(null);
     const [output, setOutput] = useState('');
-    const [isConnected, setIsConnected] = useState(false)
+    const [isConnected, setIsConnected] = useState(false);
     const [version, setVersion] = useState(null);
-    const [code, setCode] = useState(null);
+    const codeRef = useRef('');
+    const outputRef = useRef(''); // Ref to store output without causing re-renders
+    const pyodideRef = useRef(null);
+    const editorRef = useRef(null); // Ref to the CodeMirror instance
 
     useEffect(() => {
-        socket.connect()
+        socket.connect();
         const fetchData = async () => {
-          const { version, doc } = await getDocument(socket, room_token);
-          setVersion(version);
-          setCode(doc.toString());
+            const { version, doc } = await getDocument(socket, room_token);
+            setVersion(version);
+            codeRef.current = doc.toString(); // Store initial code in ref
         };
         
         fetchData();
     
-        const handleConnect = () => {
-          setIsConnected(true);
-          socket.emit('joinRoom', room_token, user.id)
-        }
+        const handleConnect = () => setIsConnected(true);
         const handleDisconnect = () => setIsConnected(false);
         const handlePeerJoined = (userId) => {
-            toast.info(`User ${userId} has joined the room!`)
-        }
-
+            toast.info(`User ${userId} has joined the room!`);
+        };
+    
         socket.on('connect', handleConnect);
         socket.on('disconnect', handleDisconnect);
-        socket.on('joinedRoom', handlePeerJoined)
-    
+
         return () => {
-          socket.off('connect', handleConnect);
-          socket.off('disconnect', handleDisconnect);
-          socket.off('joinedRoom', handlePeerJoined);
+            socket.off('connect', handleConnect);
+            socket.off('disconnect', handleDisconnect);
+            socket.off('joinedRoom', handlePeerJoined);
         };
-      }, []);
+    }, []);
 
-    /**
-     * Pyodide doesnt seem to work when i add websockets
-     */
-    // useEffect(() => {
-    //     const loadPyodide = async () => {
-    //         const pyodideInstance = await window.loadPyodide({
-    //             indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/',
-    //             stdout: (text) => setOutput(prevOutput => prevOutput + text + "\n"), // Add a newline
-    //             stderr: (text) => setOutput(prevOutput => prevOutput + `Error: ${text}\n`) // Add a newline for errors
-    //         });
-    //         setPyodide(pyodideInstance);
-    //     };
+    useEffect(() => {
+        const loadPyodide = async () => {
+            const pyodideInstance = await window.loadPyodide({
+                indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.2/full/',
+                stdout: (text) => appendOutput(text),
+                stderr: (text) => appendOutput(`Error: ${text}`)
+            });
+            pyodideRef.current = pyodideInstance;
+        };
     
-    //     loadPyodide();
-    // }, []);
+        loadPyodide();
+    }, []);
 
-    const runCode = () => {
+    const handleCodeChange = (newCode) => {
+        // Update the codeRef every time the editor changes
+        codeRef.current = newCode;
+    };
+
+    const runCode = async () => {
+        const pyodide = pyodideRef.current;
+
         if (pyodide) {
             // Clear previous output
-            setOutput('');
+            outputRef.current = ''; // Update the ref
+            setOutput(''); // Clear the UI output
             try {
-                const result = pyodide.runPython(CLEAR_INTERPRETER + code); // Run Python code
+                const result = await pyodide.runPythonAsync(CLEAR_INTERPRETER + codeRef.current);
                 if (result) {
-                    setOutput(prevOutput => prevOutput + result); // Append result if there is one
+                    appendOutput(result);
                 }
             } catch (error) {
-                setOutput(prevOutput => prevOutput + `Error: ${error}`); // Handle runtime errors
+                appendOutput(`Error: ${error}`);
             }
         } else {
             toast.error("Pyodide is not loaded yet!");
         }
     };
 
+    // Debounced function to append output to the terminal
+    const appendOutput = useCallback(debounce((newOutput) => {
+        outputRef.current += newOutput;
+        setOutput(outputRef.current); // Trigger update in the UI with a delay
+    }, 300), []);
+
+    // Memoize the extensions for CodeMirror to avoid unnecessary recomputations
+    const extensions = useMemo(() => [
+        basicSetup(),
+        python(),
+        peerExtension(version, socket, room_token, user.id)
+    ], [version, socket, room_token, user.id]);
 
     return (
         <>
             <Navbar />
-                <div className="editor-container">
-                    <div>
-                        <div className="headerStyle">Let's Collaborate!
+            <div className="editor-container">
+                <div>
+                    <div className="headerStyle">
+                        Let's Collaborate!
                         {isConnected ? <p>Connected</p> : <p>Not connected</p>}
-                        </div>
-                        
-                        <div className="editor-section">
-                            {code !== null && version !== null ?
-                                <CodeMirror
-                                    value={code}
-                                    theme={vscodeDark}
-                                    basicSetup={false}
-                                    id="codeEditor"
-                                    extensions={[
-                                        basicSetup(),
-                                        python(),
-                                        peerExtension(version, socket, room_token, user.id)
-                                    ]}
-                                    className="codeMirrorStyle"
-                                /> : (
-                                    <p>Loading</p>
-                                )
-                            }
-                            <div className="run-button-container">
-                                <button onClick={runCode} className="run-button">Run Code</button>
-                            </div>
-                        </div>
+                    </div>
 
-                        <div className="terminal-container">
-                            <div className="terminal">
-                                <div className="command-line">
-                                <h3>Output:</h3>
-                                <pre>{output}</pre>
-                                </div>
-                            </div>
+                    <div className="editor-section">
+                        {codeRef.current !== null && version !== null ? (
+                            <CodeMirror
+                                key="fixedKey" // Add a stable key to avoid full remounts unless explicitly changed
+                                ref={editorRef} // Assign ref to the editor
+                                value={codeRef.current}
+                                theme={vscodeDark}
+                                basicSetup={false}
+                                extensions={extensions}
+                                onChange={handleCodeChange}
+                                className="codeMirrorStyle"
+                            />
+                        ) : (
+                            <p>Loading</p>
+                        )}
+                        <div className="run-button-container">
+                            <button onClick={runCode} className="run-button">Run Code</button>
                         </div>
+                    </div>
 
+                    <div className="terminal-container">
+                        <OutputConsole output={output} />
                     </div>
                 </div>
-
+            </div>
         </>
     );
 }
