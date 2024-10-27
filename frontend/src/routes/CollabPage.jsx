@@ -1,14 +1,13 @@
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import CodeMirror, { basicSetup } from "@uiw/react-codemirror";
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useMemo} from 'react';
 import { useParams } from 'react-router';
 import { toast } from 'react-toastify';
 import { getDocument, peerExtension } from '../collab/collabExtension';
 import { socket } from '../collab/socket';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
-import { debounce } from 'lodash';
 
 const CLEAR_INTERPRETER = `
 globals().clear()
@@ -59,7 +58,7 @@ function CollabPage() {
             socket.off('disconnect', handleDisconnect);
             socket.off('joinedRoom', handlePeerJoined);
         };
-    }, []);
+    }, [room_token]);
 
     useEffect(() => {
         const loadPyodide = async () => {
@@ -99,18 +98,17 @@ function CollabPage() {
         }
     };
 
-    // Debounced function to append output to the terminal
-    const appendOutput = useCallback(debounce((newOutput) => {
+      const appendOutput = (newOutput) => {
         outputRef.current += newOutput;
-        setOutput(outputRef.current); // Trigger update in the UI with a delay
-    }, 300), []);
-
+        setOutput(outputRef.current); // Immediately update the UI
+      };
+      
     // Memoize the extensions for CodeMirror to avoid unnecessary recomputations
     const extensions = useMemo(() => [
         basicSetup(),
         python(),
         peerExtension(version, socket, room_token, user.id)
-    ], [version, socket, room_token, user.id]);
+    ], [version, room_token, user.id]);
 
     return (
         <>
@@ -125,7 +123,6 @@ function CollabPage() {
                     <div className="editor-section">
                         {codeRef.current !== null && version !== null ? (
                             <CodeMirror
-                                key="fixedKey" // Add a stable key to avoid full remounts unless explicitly changed
                                 ref={editorRef} // Assign ref to the editor
                                 value={codeRef.current}
                                 theme={vscodeDark}
