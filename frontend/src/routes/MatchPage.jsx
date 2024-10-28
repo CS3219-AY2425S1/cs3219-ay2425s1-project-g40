@@ -52,6 +52,7 @@ function MatchPage() {
         if(data.matches !== undefined) {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
           toast.success("Match found!")
+          localStorage.setItem("questiondata",data.matches.question.description)
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);

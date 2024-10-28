@@ -8,6 +8,7 @@ import { getDocument, peerExtension } from '../collab/collabExtension';
 import { socket } from '../collab/socket';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
+import ReactMarkdown from 'react-markdown';
 
 const CLEAR_INTERPRETER = `
 globals().clear()
@@ -115,9 +116,8 @@ function CollabPage() {
             <Navbar />
             <div className="editor-container">
                 <div>
-                    <div className="headerStyle">
-                        Let's Collaborate!
-                        {isConnected ? <p>Connected</p> : <p>Not connected</p>}
+                    <div className="markdown-container">
+                        {isConnected ? <ReactMarkdown>{localStorage.getItem("questiondata")}</ReactMarkdown> : <p>Not connected</p>}
                     </div>
 
                     <div className="editor-section">
