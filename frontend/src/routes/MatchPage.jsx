@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import Navbar from '../component/navigation/NavBar';
 import './MatchPage.css';
+import { useNavigate } from 'react-router-dom';
 
 function MatchPage() {
+  const navigate = useNavigate();
 
   const intervalIdRef = useRef(null);
   var intervalId = useRef(null);
@@ -53,6 +55,7 @@ function MatchPage() {
           setStatus(`${data.matches.user_id} has matched with user: ${data.matches.other_user_id} with topic: ${data.matches.key}`);
           toast.success("Match found!")
           localStorage.setItem("questiondata",data.matches.question.description)
+          navigate(`/collab/${data.matches.room_token}`)
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
