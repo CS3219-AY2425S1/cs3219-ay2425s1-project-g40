@@ -59,6 +59,7 @@ function MatchPage() {
           clearInterval(intervalIdRef.current);
           clearInterval(intervalId);
           setTime(0);
+          window.location.reload();
         }
       })
       .catch(error => {
