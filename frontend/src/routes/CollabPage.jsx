@@ -46,7 +46,12 @@ function CollabPage() {
         fetchData();
     
         const handleConnect = () => setIsConnected(true);
-        const handleDisconnect = () => setIsConnected(false);
+         
+        const handleDisconnect = () => {
+            setIsConnected(false);
+            socket.emit('userDisconnection', room_token, user.id);
+        }
+        
         const handlePeerJoined = (userId) => {
             toast.info(`User ${userId} has joined the room!`);
         };
