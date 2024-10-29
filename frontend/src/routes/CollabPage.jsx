@@ -54,29 +54,17 @@ function CollabPage() {
             }
             
           }
-         
-        const handleDisconnect = () => {
-            setIsConnected(false);
-            socket.emit('userDisconnection', room_token, user.id);
-        }
 
-        const handleDisconnecting = () => {
-            console.log(`Socket is disconnecting for user ${user.id}`);
-            socket.emit('userDisconnection', room_token, user.id);
-        };
-    
         const handlePeerJoined = (userId) => {
             toast.info(`User ${userId} has joined the room!`);
         };
 
-        const handlePeerDisconnected = (userId) => {
-            toast.info(`User ${userId} has left the room!`);
+        const handlePeerDisconnected = () => {
+            toast.info(`The other user has left the room!`);
         };
     
         socket.on('connect', handleConnect);
         socket.on('joinedRoom', handlePeerJoined);
-        socket.on('disconnect', handleDisconnect);
-        socket.on('disconnecting', handleDisconnecting);
         socket.on('userDisconnected', handlePeerDisconnected);
         socket.on('connect_error', (err) => {
             console.error('Connection Error:', err);
@@ -87,8 +75,6 @@ function CollabPage() {
         return () => {
             socket.off('connect', handleConnect);
             socket.off('joinedRoom', handlePeerJoined);
-            socket.off('disconnect', handleDisconnect);
-            socket.off('disconnecting', handleDisconnecting);
             socket.off('userDisconnected', handlePeerDisconnected);
             socket.disconnect();
         };
