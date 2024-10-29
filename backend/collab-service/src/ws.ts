@@ -67,13 +67,11 @@ const initRoom = (roomId: string): void => {
 }
 
 ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
-  log(`User disconnected ${room}`)
+  log(`User disconnected!`)
   ws.to(room).emit("userDisconnected");
 });
 
 ws.on("connection", (socket) => {
-  log('User connected!', socket.id)
-
   socket.on("joinRoom", (roomId: string, userId: string) => {
     socket.join(roomId);
     log(`${userId} joined room: ${roomId}`);
@@ -87,14 +85,12 @@ ws.on("connection", (socket) => {
   socket.on("getDocument", (roomId: string) => {
     initRoom(roomId);
     const room = roomData[roomId]
-    log(`Received getDocument for room ${roomId}...`)
 		socket.emit("getDocumentResponse", room.updates.length, room.code.toString());
 	})
 
 	socket.on('pushUpdates', (roomId, version, codeUpdates) => {
     initRoom(roomId)
     const room = roomData[roomId]
-    log(`Room ${roomId} received pushUpdates...`)
 		codeUpdates = JSON.parse(codeUpdates);
 		try {
 			if (version != room.updates.length) {
