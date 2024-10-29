@@ -121,8 +121,9 @@ ws.on("connection", (socket) => {
 		}
 	})
 
-  socket.on("disconnecting", () => {
-    log(`User ${socket.id} is disconnecting from rooms: ${Array.from(socket.rooms)}`);
+  ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
+    log(`User left room: ${room}`);
+    socket.emit("userDisconnected");
   });
 })
 
