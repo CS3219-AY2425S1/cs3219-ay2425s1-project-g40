@@ -51,18 +51,23 @@ function CollabPage() {
             setIsConnected(false);
             socket.emit('userDisconnection', room_token, user.id);
         }
-        
-        const handlePeerJoined = (userId) => {
-            toast.info(`User ${userId} has joined the room!`);
+
+        // const handlePeerJoined = (userId) => {
+        //     toast.info(`User ${userId} has joined the room!`);
+        // };
+
+        const handlePeerDisconnected = (userId) => {
+            toast.info(`User ${userId} has left the room!`);
         };
     
         socket.on('connect', handleConnect);
         socket.on('disconnect', handleDisconnect);
+        socket.on('userDisconnected', handlePeerDisconnected);
 
         return () => {
             socket.off('connect', handleConnect);
             socket.off('disconnect', handleDisconnect);
-            socket.off('joinedRoom', handlePeerJoined);
+            socket.off('userDisconnected', handlePeerDisconnected);
         };
     }, [room_token]);
 
