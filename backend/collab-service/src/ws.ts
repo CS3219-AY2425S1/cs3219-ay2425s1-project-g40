@@ -42,6 +42,7 @@ const ws = new SocketIoServer(wsServer, {
  * - Store and retrieve room data from Redis instead
  */
 type RoomData = {
+  users: string[];
   updates: Update[];
   code: Text;
   pending: ((value: any) => void)[]
@@ -52,6 +53,7 @@ const roomData: Record<string, RoomData> = {}
 const initRoom = (roomId: string): void => {
   if (!roomData[roomId]) {
     roomData[roomId] = {
+      users: [],
       updates: [],
       code: Text.of([`print("Hello room ${roomId}")`]),
       /**
@@ -64,14 +66,22 @@ const initRoom = (roomId: string): void => {
   }
 }
 
+ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
+  log(`User disconnected ${room}`)
+  ws.to(room).emit("userDisconnected");
+});
+
 ws.on("connection", (socket) => {
-  log('User connected!')
+  log('User connected!', socket.id)
 
   socket.on("joinRoom", (roomId: string, userId: string) => {
     socket.join(roomId);
     log(`${userId} joined room: ${roomId}`);
     initRoom(roomId);
-    socket.broadcast.to(roomId).emit("joinedRoom", userId); // notify all that userId joined roomId
+    roomData[roomId].users.push(userId);
+    if (roomData[roomId].users.length === 2) {
+      socket.nsp.to(roomId).emit("joinedRoom", userId); // notify all users that there are 2 users, session can start
+    }
   })
 
   socket.on("getDocument", (roomId: string) => {
@@ -113,7 +123,6 @@ ws.on("connection", (socket) => {
      */
     initRoom(roomId)
     const room = roomData[roomId]
-    log(`Room ${roomId} received pullUpdates...`)
 		if (version < room.updates.length) {
 			socket.emit("pullUpdateResponse", JSON.stringify(room.updates.slice(version)))
 		} else {
@@ -121,10 +130,10 @@ ws.on("connection", (socket) => {
 		}
 	})
 
-  ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
-    log(`User left room: ${room}`);
-    socket.emit("userDisconnected");
-  });
+  // socket.on("disconnect", () => {
+  //   log(`User disconnected`);
+  //   socket.emit("userDisconnected");
+  // })
 })
 
 export default wsServer;

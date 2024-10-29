@@ -63,8 +63,6 @@ async def get_matches(user_id: str):
             return {"message": "No matches found"}
 
         match_data = json.loads(match.decode("utf-8"))
-        question = get_one_question(topic=match_data["topic"], difficulty=match_data["difficulty"])
-        match_data.update({"question": question})
         return {"matches": match_data}
     except KeyError as e:
         logger.error(f"Something went wrong: {e}\n{match_data}")

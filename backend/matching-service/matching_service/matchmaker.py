@@ -9,6 +9,7 @@ from structlog import get_logger
 
 from matching_service.common import MatchRequest
 from matching_service.config import Channels, RedisSettings, settings
+from matching_service.grpc import get_one_question
 
 structlog.configure(
     processors=[
@@ -60,7 +61,7 @@ class Matchmaker:
                 other_user = self.client.get(unmatched_key).decode("utf-8")
                 self.client.delete(unmatched_key)
                 logger.info(f"\t✅ Matched Users: {req.user} and {other_user} for {unmatched_key}!")
-
+                question = get_one_question(topic=req.topic, difficulty=req.difficulty)
                 match_data = {
                     "room_token": token_urlsafe(8),
                     "user_id": str(req.user),
@@ -69,6 +70,7 @@ class Matchmaker:
                     "status": "successful",
                     "difficulty": req.difficulty.value,
                     "topic": req.topic,
+                    "question": question,
                 }
                 try:
                     pipeline = self.client.pipeline()

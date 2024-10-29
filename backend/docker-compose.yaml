@@ -74,7 +74,7 @@ services:
     environment:
       - REDIS_HOST=matchmaker-redis
       - REDIS_PORT=6379
-
+      - QUESTIONS_GRPC=question-service:50051
   # collab service
   collab-redis:
     image: redis:alpine3.20

@@ -1,14 +1,14 @@
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import CodeMirror, { basicSetup } from "@uiw/react-codemirror";
-import React, { useEffect, useRef, useState, useMemo} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router';
 import { toast } from 'react-toastify';
 import { getDocument, peerExtension } from '../collab/collabExtension';
 import { socket } from '../collab/socket';
 import Navbar from '../component/navigation/NavBar';
 import './CollabPage.css';
-import ReactMarkdown from 'react-markdown';
 
 const CLEAR_INTERPRETER = `
 globals().clear()
@@ -56,7 +56,7 @@ function CollabPage() {
           }
 
         const handlePeerJoined = (userId) => {
-            toast.info(`User ${userId} has joined the room!`);
+            toast.success(`Both users in room!`);
         };
 
         const handlePeerDisconnected = () => {
