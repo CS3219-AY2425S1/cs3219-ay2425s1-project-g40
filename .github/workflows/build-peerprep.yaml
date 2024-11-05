@@ -6,9 +6,6 @@ on:
       - main
 
 env:
-  REGION: asia-southeast1
-  GCR_PROJECT: cs3219-g40
-  GCR_REPO: cs3219-g40
   REGISTRY: ghcr.io
   REPO: cs3219-ay2425s1/cs3219-ay2425s1-project-g40
   LATEST_TAG: latest
@@ -54,17 +51,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to GCR
-        uses: google-github-actions/auth@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          credentials_json: ${{ secrets.GCR_SERVICE_ACCOUNT }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: GCR Docker auth
-        run: |-
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -74,4 +65,4 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
-            ${{ env.REGION }}-docker.pkg.dev/${{ env.GCR_PROJECT }}/${{ env.GCR_REPO }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
