@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: peerprep-collab
+  name: peerprep-collab
+  namespace: peerprep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerprep-collab
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peerprep-collab
+    spec:
+      containers:
+        - image: alxarkar/collab-service:latest
+          name: peerprep-collab
+          ports:
+            - containerPort: 8000 # http
+          resources: {}
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: COLLAB_REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: COLLAB_REDIS_PORT
+status: {}

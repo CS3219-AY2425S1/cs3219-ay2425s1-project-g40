@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: peerprep-question
+  name: peerprep-question
+  namespace: peerprep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerprep-question
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peerprep-question
+    spec:
+      containers:
+        - image: alxarkar/question-service:latest
+          name: peerprep-question
+          ports:
+            - containerPort: 8000 # http
+            - containerPort: 50051 # grpc
+          resources: {}
+          env:
+            - name: QUESTION_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: peerprep-secret
+                  key: QUESTION_DB_URL
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTION_DB_NAME
+            - name: COLLECTION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTION_COLLECTION_NAME
+status: {}

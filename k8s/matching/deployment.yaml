@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: peerprep-matching
+  name: peerprep-matching
+  namespace: peerprep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerprep-matching
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peerprep-matching
+    spec:
+      containers:
+        - image: alxarkar/matching-service:latest
+          name: peerprep-matching
+          ports:
+            - containerPort: 8000 # http
+          resources: {}
+          command: ["make", "server"]
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: MATCHMAKER_REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: MATCHMAKER_REDIS_PORT
+            - name: QUESTIONS_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTIONS_GRPC
+status: {}
