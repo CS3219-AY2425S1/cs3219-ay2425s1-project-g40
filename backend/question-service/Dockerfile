@@ -5,7 +5,7 @@
 # Multi-stage build to keep images small
 #
 # https://pythonspeed.com/articles/multi-stage-docker-python/
-FROM --platform=linux/amd64 python:3.12.7-alpine AS python-base
+FROM python:3.12.7-bullseye AS python-base
 
 ENV PYTHONUNBUFFERED=1 \
     # prevents python creating .pyc files
@@ -20,9 +20,10 @@ ENV PYTHONUNBUFFERED=1 \
     VENV_PATH="/opt/pysetup/.venv"
 
 # Update and install packages + create venv
-RUN apk upgrade --no-cache  && \
-    apk add --no-cache \
-    build-base
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR $PYSETUP_PATH
 COPY requirements.txt ./
