@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     # Env vars
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
-    ORIGINS: list[str] = ["http://localhost", "http://localhost:3000"]
+    ORIGINS: list[str] = ["*"]
     QUESTIONS_GRPC: str = "localhost:50051"
     # Match expiry
     MATCH_TIMEOUT: int = 30
