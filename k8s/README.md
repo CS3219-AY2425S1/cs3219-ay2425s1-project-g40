@@ -24,16 +24,30 @@ data:
 
 ---
 
-1. Create namespace, config map and secrets
+1. Enable ingress addon for Minikube
 
 ```
-k create -f manifests/ns.yaml
-k create -f manifests/configMap.yaml
-k create -f manifests/secrets.yaml
+minikube addons enable ingress
 ```
 
-2. Create services
+2. Create K8s resources
 
 ```
-k create -f manifests/collab/
+./start.sh
 ```
+
+3. Expose Ingress to localhost
+
+```
+minikube tunnel
+```
+
+3.1 Update host file
+Mac
+In `/etc/hosts
+
+```
+127.0.0.1 api.peerprep.svc.local
+```
+
+> For windows [edit host file](https://www.liquidweb.com/blog/edit-host-file-windows-10/)

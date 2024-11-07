@@ -1,0 +1,28 @@
+# https://medium.com/@ankit.wal/authenticate-requests-to-apps-on-kubernetes-using-nginx-ingress-and-an-authservice-37bf189670ee
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-service
+  namespace: peerprep
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.peerprep.svc.local
+      http:
+        paths:
+          - path: /user(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-user-service
+                port:
+                  number: 8000
+          - path: /question(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-question-service
+                port:
+                  number: 8000
