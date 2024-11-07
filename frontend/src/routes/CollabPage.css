@@ -51,11 +51,12 @@ body {
   }
   
 
-  .run-button-container {
+  .button-container {
     display: flex;
     justify-content: flex-end; /* Align the button to the right */
     width: 100%; /* Full width for the container */
     margin-top: 10px; /* Space above the button */
+    gap: 10px; /* Space between the buttons */
   }
 
   .run-button {
@@ -76,6 +77,26 @@ body {
   .run-button:hover {
     background-color: #11a91b;
   }
+
+  .toggle-button {
+    font-size: 20px;
+    font-family: monospace;
+    color: white;
+    border: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px black;
+    background-color: black;
+    border-style: solid;
+    border-width: thin;
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+  }
+  
+  .toggle-button:hover {
+    background-color: grey;
+  }
+
 
 .terminal-container .terminal {
   display: block;

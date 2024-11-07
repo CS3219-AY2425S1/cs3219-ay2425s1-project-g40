@@ -30,10 +30,16 @@ function CollabPage() {
     const [output, setOutput] = useState('');
     const [isConnected, setIsConnected] = useState(false);
     const [version, setVersion] = useState(null);
+    const [isDarkMode, setIsDarkMode] = useState(true); // Track theme mode
     const codeRef = useRef('');
     const outputRef = useRef(''); // Ref to store output without causing re-renders
     const pyodideRef = useRef(null);
     const editorRef = useRef(null); // Ref to the CodeMirror instance
+
+    useEffect(() => {
+        // Set initial theme based on state
+        document.body.style.backgroundColor = isDarkMode ? 'black' : 'white';
+    }, [isDarkMode]); // This effect triggers when `isDarkMode` changes
 
     useEffect(() => {
         socket.connect();
@@ -117,10 +123,16 @@ function CollabPage() {
         }
     };
 
-      const appendOutput = (newOutput) => {
+    const appendOutput = (newOutput) => {
         outputRef.current += newOutput;
         setOutput(outputRef.current); // Immediately update the UI
-      };
+    };
+
+    // Toggle light/dark mode
+    const toggleTheme = () => {
+        setIsDarkMode(prevMode => !prevMode); // Toggle the dark mode state
+        document.body.style.backgroundColor = isDarkMode ? 'white' : 'black'; // Apply new background color
+    };
       
     // Memoize the extensions for CodeMirror to avoid unnecessary recomputations
     const extensions = useMemo(() => [
@@ -151,8 +163,12 @@ function CollabPage() {
                         ) : (
                             <p>Loading</p>
                         )}
-                        <div className="run-button-container">
+                        <div className="button-container">
                             <button onClick={runCode} className="run-button">Run Code</button>
+                            {/* Add Toggle Light/Dark Mode Button */}
+                            <button onClick={toggleTheme} className="toggle-button">
+                                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                            </button>
                         </div>
                     </div>
 
