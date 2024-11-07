@@ -132,6 +132,22 @@ function CollabPage() {
     const toggleTheme = () => {
         setIsDarkMode(prevMode => !prevMode); // Toggle the dark mode state
         document.body.style.backgroundColor = isDarkMode ? 'white' : 'black'; // Apply new background color
+
+        // Toggle markdown container background color
+        const markdownContainer = document.querySelector('.markdown-container');
+        if (markdownContainer) {
+            markdownContainer.style.backgroundColor = isDarkMode ? '#1e1e1e' : 'black';
+        }
+
+        // Toggle .command-line background color
+        const commandLine = document.querySelector('.terminal-container .terminal .command-line');
+        if (commandLine) {
+            commandLine.style.backgroundColor = isDarkMode ? '#1e1e1e' : 'black';
+        }
+        const commandLineBody = document.querySelector('.terminal-container .terminal');
+        if (commandLineBody) {
+            commandLineBody.style.backgroundColor = isDarkMode ? '#1e1e1e' : 'black';
+        }
     };
       
     // Memoize the extensions for CodeMirror to avoid unnecessary recomputations
