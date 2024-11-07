@@ -36,34 +36,62 @@ const ws = new SocketIoServer(wsServer, {
   adapter: createAdapter(pubClient, subClient) 
 });
 
-/**
- * TODO
- * 
- * - Store and retrieve room data from Redis instead
- */
-type RoomData = {
-  users: string[];
+type RoomState = {
+  users: Set<string>;
   updates: Update[];
   code: Text;
-  pending: ((value: any) => void)[]
 }
 
-const roomData: Record<string, RoomData> = {}
+const EXPIRE_TIME = 5 * 60 * 60; // 5 hours in seconds
+/**
+ * Stores callback functions that is executed when new updates are available
+ * - Updated in pullUpdates
+ * - Called in pushUpdates
+ */
+const pendingCallback: Record<string,((value: any) => void)[]> = {};
 
-const initRoom = (roomId: string): void => {
-  if (!roomData[roomId]) {
-    roomData[roomId] = {
-      users: [],
-      updates: [],
-      code: Text.of([`print("Hello room ${roomId}")`]),
-      /**
-       * Stores callback functions that is executed when new updates are available
-       * - Updated in pullUpdates
-       * - Called in pushUpdates
-       */
-      pending: []
+
+const saveRoomState = async (roomId: string, roomData: RoomState) => {
+  const { users, updates, code } = roomData;
+  const roomDataJSON = JSON.stringify({
+    users: Array.from(users),
+    updates: updates.map(update => ({changes: update.changes.toJSON(), clientID: update.clientID })),
+    code: code.toJSON(),
+  })
+
+  await pubClient.setex(`roomData:${roomId}`, EXPIRE_TIME, roomDataJSON);
+}
+
+const getRoomState = async (roomId: string): Promise<RoomState | null> => {
+  const roomDataJSON = await pubClient.get(`roomData:${roomId}`);
+  if (roomDataJSON) {
+    const { users, updates, code} = JSON.parse(roomDataJSON);
+    return {
+      users: new Set(users),
+      updates: updates.map((update: { changes: any; clientID: any; }) => ({changes: ChangeSet.fromJSON(update.changes), clientID: update.clientID})),
+      code: Text.of(code),
     }
   }
+  return null;
+}
+
+const initRoom = async (roomId: string): Promise<RoomState> => {
+  let roomState = await getRoomState(roomId);
+
+  if (!roomState) {
+    roomState = {
+      users: new Set(),
+      updates: [],
+      code: Text.of([`print("Hello room ${roomId}")`]),
+    }
+  }
+  await saveRoomState(roomId, roomState);
+
+  if (!pendingCallback[roomId]) {
+    pendingCallback[roomId] = [];
+  }
+
+  return roomState;
 }
 
 ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
@@ -72,26 +100,28 @@ ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
 });
 
 ws.on("connection", (socket) => {
-  socket.on("joinRoom", (roomId: string, userId: string) => {
+  socket.on("joinRoom", async (roomId: string, userId: string) => {
     socket.join(roomId);
     log(`${userId} joined room: ${roomId}`);
-    initRoom(roomId);
-    roomData[roomId].users.push(userId);
-    if (roomData[roomId].users.length === 2) {
+  
+    const room = await initRoom(roomId);
+    room.users.add(userId);
+    await saveRoomState(roomId, room);
+
+    if (room.users.size === 2) {
       socket.nsp.to(roomId).emit("joinedRoom", userId); // notify all users that there are 2 users, session can start
     }
   })
 
-  socket.on("getDocument", (roomId: string) => {
-    initRoom(roomId);
-    const room = roomData[roomId]
+  socket.on("getDocument", async (roomId: string) => {
+    const room = await initRoom(roomId);
 		socket.emit("getDocumentResponse", room.updates.length, room.code.toString());
 	})
 
-	socket.on('pushUpdates', (roomId, version, codeUpdates) => {
-    initRoom(roomId)
-    const room = roomData[roomId]
+	socket.on('pushUpdates', async (roomId, version, codeUpdates) => {
+    const room = await initRoom(roomId);
 		codeUpdates = JSON.parse(codeUpdates);
+
 		try {
 			if (version != room.updates.length) {
 				socket.emit('pushUpdateResponse', false);
@@ -101,15 +131,19 @@ ws.on("connection", (socket) => {
 					room.updates.push({changes, clientID: update.clientID})
           room.code = changes.apply(room.code)
 				}
+        await saveRoomState(roomId, room);
+
 				socket.emit('pushUpdateResponse', true);
-				while (room.pending.length) room.pending.pop()!(room.updates)
+
+        const pending = pendingCallback[roomId];
+				while (pending && pending.length) pending.pop()!(room.updates)
 			}
 		} catch (error) {
 			console.error(error)
 		}
 	})
 
-  socket.on('pullUpdates', (roomId:string, version: number) => {
+  socket.on('pullUpdates', async (roomId:string, version: number) => {
     /**
      * Client is requesting updates starting from `version`
      * 
@@ -117,19 +151,15 @@ ws.on("connection", (socket) => {
      * Else, there are no new updates. Callback fn is stored in the pending array
      * - Callback fn is called in pushUpdateHandler
      */
-    initRoom(roomId)
-    const room = roomData[roomId]
+    const room = await initRoom(roomId)
+
 		if (version < room.updates.length) {
 			socket.emit("pullUpdateResponse", JSON.stringify(room.updates.slice(version)))
 		} else {
-			room.pending.push((updates) => { socket.emit('pullUpdateResponse', JSON.stringify(room.updates.slice(version))) });
+      if (!pendingCallback[roomId]) pendingCallback[roomId] = [];
+			pendingCallback[roomId].push((updates) => { socket.emit('pullUpdateResponse', JSON.stringify(room.updates.slice(version))) });
 		}
 	})
-
-  // socket.on("disconnect", () => {
-  //   log(`User disconnected`);
-  //   socket.emit("userDisconnected");
-  // })
 })
 
 export default wsServer;
