@@ -1,0 +1,41 @@
+name: Deploy Frontend to Cloud Run
+
+env:
+  SERVICE_NAME: peerprep
+  DOCKER_IMAGE_NAME: peerprep-fe
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  dockerize-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          service_account_key: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build ./frontend -t gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ env.DOCKER_IMAGE_NAME }}:latest .
+          docker push gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ env.DOCKER_IMAGE_NAME }}:latest \
+            --platform managed \
+            --region asia-southeast1 \
+            --allow-unauthenticated
