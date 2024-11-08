@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     QUESTION_DB_URL: str = "mongodb://localhost:27018"
     DB_NAME: str = "questions_db"
     COLLECTION_NAME: str = "questions"
-    ORIGINS: list[str] = ["http://localhost", "http://localhost:3000"]
+    ORIGINS: list[str] = ["*"]
 
     class Config:
         env_file = ENV_PATH

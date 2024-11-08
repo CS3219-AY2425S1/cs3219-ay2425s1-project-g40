@@ -49,7 +49,7 @@ services:
   matchmaker-redis:
     image: redis:alpine3.20
     ports:
-      - "6739:6739"
+      - "6379:6379"
   matching-service:
     depends_on:
       - matchmaker-redis
@@ -79,7 +79,7 @@ services:
   collab-redis:
     image: redis:alpine3.20
     ports:
-      - "6740:6739"
+      - "6380:6379"
   collab-service:
     build:
       context: ./collab-service

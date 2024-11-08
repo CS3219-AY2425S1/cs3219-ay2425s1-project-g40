@@ -15,8 +15,6 @@ COPY . .
 # Step 6: Expose the port the app runs on
 EXPOSE 3000
 
-# OpenSSL support
-ENV NODE_OPTIONS=--openssl-legacy-provider
+RUN npm run build
 
-# Step 7: Command to run the React app
-CMD ["npm", "start"]
+CMD ["npx", "serve", "-s", "build"]
