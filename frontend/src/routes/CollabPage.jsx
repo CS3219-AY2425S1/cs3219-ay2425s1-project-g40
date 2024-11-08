@@ -82,6 +82,8 @@ function CollabPage() {
             socket.off('connect', handleConnect);
             socket.off('joinedRoom', handlePeerJoined);
             socket.off('userDisconnected', handlePeerDisconnected);
+            socket.disconnect(); // Disconnect socket
+            console.log('Socket disconnected');
         };
     }, [room_token]);
 
