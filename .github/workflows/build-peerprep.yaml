@@ -9,9 +9,11 @@ env:
   REGISTRY: ghcr.io
   REPO: cs3219-ay2425s1/cs3219-ay2425s1-project-g40
   LATEST_TAG: latest
+  CLOUD_RUN_FRONTEND: peerprep-frontend
 
 jobs:
   build-and-push:
+    name: Publish images to GHCR, GCR and DockerHub
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,6 +59,16 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          service_account_key: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker asia-southeast-docker.pkg.dev
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -66,3 +78,24 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
             ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
+            gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
+
+  deploy-frontend:
+    name: Deploy frontend to Cloud Run
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          service_account_key: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Deploy frontend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.CLOUD_RUN_FRONTEND }} \
+            --image gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ env.CLOUD_RUN_FRONTEND }}:latest \
+            --platform managed \
+            --region asia-southeast1 \
+            --allow-unauthenticated
