@@ -17,6 +17,9 @@ import { Server as SocketIoServer } from "socket.io";
 import log from "./logger";
 
 const ENV = process.env.ENV || "DEV";
+const SOCKET_PATH = `${ ENV === "DEV" ? "" : "/ws"}/sockets/`;
+log("Socket.io listening at: ", SOCKET_PATH);
+
 const REDIS_PORT = process.env.REDIS_PORT ? +process.env.REDIS_PORT : 6379;
 const REDIS_HOST = process.env.REDIS_HOST || "localhost";
 
@@ -38,7 +41,7 @@ const ws = new SocketIoServer(wsServer, {
    * 
    * In PROD, the service is under http://<host>/ws/sockets
    */
-  path: `${ ENV === "DEV" ? "" : "/ws"}/sockets`,
+  path: SOCKET_PATH,
   cors: { origin: "*", methods: ["GET", "POST"]},
   adapter: createAdapter(pubClient, subClient) 
 });
@@ -108,7 +111,7 @@ ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
 
 ws.on("connection", (socket) => {
   log("Socket connected!")
-  socket.on("joinRoom", (roomId: string, userId: string) => {
+  socket.on("joinRoom", async (roomId: string, userId: string) => {
     socket.join(roomId);
     log(`${userId} joined room: ${roomId}`);
   

@@ -88,5 +88,6 @@ services:
       - PORT=8000
       - REDIS_HOST=collab-redis
       - REDIS_PORT=6379
+      - ENV=DEV
     ports:
       - "8003:8000"
