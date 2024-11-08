@@ -78,7 +78,11 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
             ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
-            gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
+
+      - name: Build and Push GCR
+        run: |
+          docker build -t gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ env.CLOUD_RUN_FRONTEND }}:latest ./frontend
+          docker push gcr.io/${{ vars.GCP_PROJECT_ID }}/${{ env.CLOUD_RUN_FRONTEND }}:latest
 
   deploy-frontend:
     name: Deploy frontend to Cloud Run
