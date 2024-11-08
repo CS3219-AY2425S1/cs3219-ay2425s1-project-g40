@@ -17,7 +17,7 @@ import { Server as SocketIoServer } from "socket.io";
 import log from "./logger";
 
 const ENV = process.env.ENV || "DEV";
-const SOCKET_PATH = `${ ENV === "DEV" ? "" : "/ws"}/sockets/`;
+const SOCKET_PATH = `${ ENV === "DEV" ? "" : "/ws"}/sockets`;
 log("Socket.io listening at: ", SOCKET_PATH);
 
 const REDIS_PORT = process.env.REDIS_PORT ? +process.env.REDIS_PORT : 6379;
