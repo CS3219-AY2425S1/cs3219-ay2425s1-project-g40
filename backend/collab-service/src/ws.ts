@@ -16,8 +16,9 @@ import { Redis } from "ioredis";
 import { Server as SocketIoServer } from "socket.io";
 import log from "./logger";
 
-const REDIS_PORT = process.env.REDIS_PORT ? +process.env.REDIS_PORT : 6379
-const REDIS_HOST = process.env.REDIS_HOST || "localhost"
+const ENV = process.env.ENV || "DEV";
+const REDIS_PORT = process.env.REDIS_PORT ? +process.env.REDIS_PORT : 6379;
+const REDIS_HOST = process.env.REDIS_HOST || "localhost";
 
 /**
  * Websocket server
@@ -32,6 +33,12 @@ const subClient = pubClient.duplicate()
 
 const wsServer = http.createServer();
 const ws = new SocketIoServer(wsServer, {
+  /**
+   * In DEV, the service is under http://localhost:8000/sockets
+   * 
+   * In PROD, the service is under http://<host>/ws/sockets
+   */
+  path: `${ ENV === "DEV" ? "" : "/ws"}/sockets`,
   cors: { origin: "*", methods: ["GET", "POST"]},
   adapter: createAdapter(pubClient, subClient) 
 });
