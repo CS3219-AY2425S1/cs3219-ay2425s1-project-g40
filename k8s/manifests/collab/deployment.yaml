@@ -7,7 +7,7 @@ metadata:
   name: peerprep-collab
   namespace: peerprep
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: peerprep-collab
@@ -29,6 +29,11 @@ spec:
               cpu: 1
               memory: 1G
           env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: COLLAB_PORT
             - name: ENV
               valueFrom:
                 configMapKeyRef:

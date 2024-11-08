@@ -39,5 +39,5 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: peerprep-config
-                  key: QUESTION_COLLECTION_NAME
+                  key: QUESTIONS_GRPC
 status: {}

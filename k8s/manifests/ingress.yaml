@@ -4,39 +4,41 @@ metadata:
   name: ingress-service
   namespace: peerprep
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-    # nginx.ingress.kubernetes.io/websocket-services: peerprep-collab-service
-    # nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-    # nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    # nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/websocket-services: peerprep-collab-service
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:3000" # add Cloud Run here
 spec:
   ingressClassName: nginx
   rules:
     - host: api.peerprep.svc.local
       http:
         paths:
-          - path: /user(/|$)(.*)
+          - path: /user-service/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: peerprep-user-service
                 port:
                   number: 8000
-          - path: /question(/|$)(.*)
+          - path: /question-service/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: peerprep-question-service
                 port:
                   number: 8000
-          - path: /matching(/|$)(.*)
+          - path: /matching-service/(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: peerprep-matching-service
                 port:
                   number: 8000
-          - path: /collab
+          - path: /collab-service/(.*)
             pathType: ImplementationSpecific
             backend:
               service:

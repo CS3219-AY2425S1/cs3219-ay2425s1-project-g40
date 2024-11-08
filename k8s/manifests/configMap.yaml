@@ -15,6 +15,7 @@ data:
   MATCHMAKER_REDIS_HOST: matchmaker-redis-service
   MATCHMAKER_REDIS_PORT: "6379"
 
+  COLLAB_PORT: "8000"
   COLLAB_ENV: PROD
   COLLAB_REDIS_HOST: collab-redis-service
   COLLAB_REDIS_PORT: "6379"

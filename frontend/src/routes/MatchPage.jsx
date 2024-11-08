@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../component/navigation/NavBar';
 import './MatchPage.css';
-import { useNavigate } from 'react-router-dom';
+
+const topicAPI = process.env.REACT_APP_TOPIC_API_URL ?? "http://localhost:8000/topic"
+const matchingServiceAPI = process.env.REACT_APP_MATCHING_SERVICE_URL || "http://localhost:8002" 
 
 function MatchPage() {
   const navigate = useNavigate();
@@ -23,7 +26,7 @@ function MatchPage() {
 
   // Fetch topics from API when the component mounts
   useEffect(() => {
-    fetch("http://localhost:8000/topic")
+    fetch(topicAPI)
       .then((response) => response.json()) // Parse the JSON response
       .then((data) => {setTopics(data);
         if (data.length > 0) {
@@ -35,7 +38,7 @@ function MatchPage() {
 
 
   const checkStatus = (id) => {
-    fetch(`http://localhost:8002/matches/${id}`, 
+    fetch(`${matchingServiceAPI}/matches/${id}`, 
       {
         method: 'GET',
         headers: {
@@ -71,7 +74,7 @@ function MatchPage() {
 
   const handleMatchClick = () => {
     // Simulate a delay for matching (e.g., API call)
-    const url = new URL('http://localhost:8002/match');
+    const url = new URL(`${matchingServiceAPI}/match`);
     const user = JSON.parse(localStorage.getItem('user'));
     const payload = {
       topic: topic,
