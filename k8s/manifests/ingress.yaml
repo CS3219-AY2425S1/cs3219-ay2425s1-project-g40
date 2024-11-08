@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-service
+  namespace: peerprep
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/websocket-services: peerprep-collab-service
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    # nginx.ingress.kubernetes.io/affinity: "cookie"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.peerprep.svc.local
+      http:
+        paths:
+          - path: /user(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-user-service
+                port:
+                  number: 8000
+          - path: /question(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-question-service
+                port:
+                  number: 8000
+          - path: /matching(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-matching-service
+                port:
+                  number: 8000
+          - path: /collab
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-collab-service
+                port:
+                  number: 8000

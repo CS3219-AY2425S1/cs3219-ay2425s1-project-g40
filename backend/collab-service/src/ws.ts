@@ -107,7 +107,8 @@ ws.of("/").adapter.on("leave-room", (room: string, id: string) => {
 });
 
 ws.on("connection", (socket) => {
-  socket.on("joinRoom", async (roomId: string, userId: string) => {
+  log("Socket connected!")
+  socket.on("joinRoom", (roomId: string, userId: string) => {
     socket.join(roomId);
     log(`${userId} joined room: ${roomId}`);
   

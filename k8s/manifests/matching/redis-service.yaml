@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: matchmaker-redis-service
+  namespace: peerprep
+spec:
+  selector:
+    app: matchmaker-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
+  type: ClusterIP
