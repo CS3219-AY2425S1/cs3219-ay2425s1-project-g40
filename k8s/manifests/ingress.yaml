@@ -1,4 +1,3 @@
-# https://medium.com/@ankit.wal/authenticate-requests-to-apps-on-kubernetes-using-nginx-ingress-and-an-authservice-37bf189670ee
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -6,6 +5,10 @@ metadata:
   namespace: peerprep
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/websocket-services: peerprep-collab-service
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    # nginx.ingress.kubernetes.io/affinity: "cookie"
 spec:
   ingressClassName: nginx
   rules:
@@ -24,5 +27,19 @@ spec:
             backend:
               service:
                 name: peerprep-question-service
+                port:
+                  number: 8000
+          - path: /matching(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-matching-service
+                port:
+                  number: 8000
+          - path: /collab
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: peerprep-collab-service
                 port:
                   number: 8000

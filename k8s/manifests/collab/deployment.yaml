@@ -20,6 +20,7 @@ spec:
     spec:
       containers:
         - image: alxarkar/collab-service:latest
+          imagePullPolicy: Always
           name: peerprep-collab
           ports:
             - containerPort: 8000 # http

@@ -20,6 +20,7 @@ spec:
     spec:
       containers:
         - image: alxarkar/matching-service:latest
+          imagePullPolicy: Always
           name: matchmaker
           resources: {}
           command: ["make", "matchmaker"]

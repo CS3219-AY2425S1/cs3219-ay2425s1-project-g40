@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: peerprep-collab-service
+  namespace: peerprep
+  labels:
+    app: peerprep-collab
+spec:
+  selector:
+    app: peerprep-collab
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  type: ClusterIP # Internal access within the cluster
