@@ -12,7 +12,7 @@ env:
   ARTIFACT_REGISTRY: asia-southeast1-docker.pkg.dev
   ARTIFACT_REPOSITORY: peerprep-g40
 
-  FRONTEND_NAME: peerpre-frontend
+  FRONTEND_NAME: peerprep-frontend
   FRONTEND_CONTEXT: "{{defaultContext}}:/frontend"
 
 jobs:
