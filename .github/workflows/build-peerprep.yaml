@@ -13,7 +13,7 @@ env:
   ARTIFACT_REPOSITORY: peerprep-g40
 
   FRONTEND_NAME: peerpre-frontend
-  FRONTEND_CONTEXT: "{{defaultContext}}:/frontend/Dockerfile.prod"
+  FRONTEND_CONTEXT: "{{defaultContext}}:/frontend"
 
 jobs:
   build-and-push:
@@ -75,6 +75,7 @@ jobs:
         with:
           platforms: ${{ matrix.architecture }}
           context: ${{ matrix.service.context }}
+          dockerfile: Dockerfile.prod
           push: true
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
