@@ -7,13 +7,17 @@ on:
 
 env:
   LATEST_TAG: latest
+
   CLOUD_RUN_FRONTEND: peerprep-frontend
   ARTIFACT_REGISTRY: asia-southeast1-docker.pkg.dev
   ARTIFACT_REPOSITORY: peerprep-g40
 
+  FRONTEND_NAME: peerprep-frontend
+  FRONTEND_CONTEXT: "{{defaultContext}}:/frontend"
+
 jobs:
   build-and-push:
-    name: Publish to Google Artifact Registry and DockerHub
+    name: Build backend
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,6 +27,7 @@ jobs:
 
     strategy:
       matrix:
+        architecture: [linux/amd64, linux/arm64]
         service:
           - name: user-service
             context: "{{defaultContext}}:/backend/user-service"
@@ -32,8 +37,6 @@ jobs:
             context: "{{defaultContext}}:/backend/matching-service"
           - name: collab-service
             context: "{{defaultContext}}:/backend/collab-service"
-          - name: peerprep-frontend
-            context: "{{defaultContext}}:/frontend"
           # Add additional services as needed
 
     steps:
@@ -67,26 +70,87 @@ jobs:
           gcloud auth configure-docker \
               ${{ env.ARTIFACT_REGISTRY }}
 
-      - name: Build and push
+      - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.architecture }}
           context: ${{ matrix.service.context }}
           push: true
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
             ${{ env.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
 
+  build-and-push-frontend:
+    name: Build frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Auth Google Cloud SDK
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for Google Artifact Registry
+        run: |
+          gcloud auth configure-docker \
+              ${{ env.ARTIFACT_REGISTRY }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64
+          context: ${{ env.FRONTEND_CONTEXT }}
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ env.FRONTEND_NAME }}:${{ env.LATEST_TAG }}
+            ${{ env.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ env.FRONTEND_NAME }}:${{ env.LATEST_TAG }}
+          build-args: |
+            REACT_APP_QUESTION_API_URL=${{ vars.REACT_APP_QUESTION_API_URL }}
+            REACT_APP_TOPIC_API_URL=${{ vars.REACT_APP_TOPIC_API_URL }}
+            REACT_APP_USER_REGISTER_URL=${{ vars.REACT_APP_USER_REGISTER_URL }}
+            REACT_APP_USER_LOGIN_URL=${{ vars.REACT_APP_USER_LOGIN_URL }}
+            REACT_APP_MATCHING_SERVICE_URL=${{ vars.REACT_APP_MATCHING_SERVICE_URL }}
+            REACT_APP_COLLAB_WS=${{ vars.REACT_APP_COLLAB_WS }}
+
   deploy-frontend:
     name: Deploy frontend to Cloud Run
-    needs: build-and-push
+    needs: build-and-push-frontend
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+      - name: Auth Google Cloud SDK
+        uses: google-github-actions/auth@v2
         with:
-          service_account_key: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
       - name: Deploy frontend to Cloud Run

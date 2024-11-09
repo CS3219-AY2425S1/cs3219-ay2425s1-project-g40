@@ -45,4 +45,9 @@ spec:
                 configMapKeyRef:
                   name: peerprep-config
                   key: QUESTION_COLLECTION_NAME
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTION_ENV
 status: {}

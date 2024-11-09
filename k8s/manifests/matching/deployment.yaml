@@ -45,4 +45,9 @@ spec:
                 configMapKeyRef:
                   name: peerprep-config
                   key: QUESTIONS_GRPC
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: MATCHING_ENV
 status: {}
