@@ -21,11 +21,12 @@ structlog.configure(
 )
 
 logger = get_logger()
+ROOT_PATH: str = "/matching-service" if settings.ENV == "PROD" else "/"
 
 # Initialize FastAPI app
 app = FastAPI(
     title="Matching Service Backend",
-    root_path="/matching-service",
+    root_path=ROOT_PATH,
 )
 
 # CORS middleware

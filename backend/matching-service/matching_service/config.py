@@ -24,6 +24,7 @@ ENV_PATH = Path(PROJECT_ROOT) / ".env"
 
 class Settings(BaseSettings):
     # Env vars
+    ENV: str = "DEV"  # DEV by default
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     ORIGINS: list[str] = ["*"]
