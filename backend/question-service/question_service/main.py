@@ -24,6 +24,7 @@ structlog.configure(
     ]
 )
 logger = get_logger()
+ROOT_PATH: str = "/question-service" if settings.ENV == "PROD" else "/"
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -72,7 +73,9 @@ app = FastAPI(
         }
     },
     lifespan=app_lifespan,
+    root_path=ROOT_PATH,
 )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ORIGINS,
