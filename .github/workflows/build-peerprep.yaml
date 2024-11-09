@@ -17,7 +17,7 @@ env:
 
 jobs:
   build-and-push:
-    name: Publish to Google Artifact Registry and DockerHub
+    name: Build backend
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -82,7 +82,7 @@ jobs:
             ${{ env.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ matrix.service.name }}:${{ env.LATEST_TAG }}
 
   build-and-push-frontend:
-    name: Publish frontend
+    name: Build frontend
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -125,7 +125,7 @@ jobs:
           gcloud auth configure-docker \
               ${{ env.ARTIFACT_REGISTRY }}
 
-      - name: Build and push backend
+      - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           platforms: ${{ matrix.architecture }}
@@ -148,10 +148,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+      - name: Auth Google Cloud SDK
+        uses: google-github-actions/auth@v2
         with:
-          service_account_key: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.GCP_FRONTEND_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
       - name: Deploy frontend to Cloud Run
