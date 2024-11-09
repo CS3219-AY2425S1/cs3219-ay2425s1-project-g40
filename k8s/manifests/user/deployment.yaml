@@ -19,14 +19,14 @@ spec:
         app: peerprep-user
     spec:
       containers:
-        - image: alxarkar/user-service:latest
+        - image: asia-southeast1-docker.pkg.dev/cs3219-g40/peerprep-g40/user-service:latest
           imagePullPolicy: Always
           name: peerprep-user
           ports:
             - containerPort: 8000
           resources:
             requests:
-              cpu: 0.5
+              cpu: 1
               memory: 1G
           env:
             - name: DB_CLOUD_URI
