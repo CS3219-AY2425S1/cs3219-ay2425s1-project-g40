@@ -11,7 +11,7 @@ from matching_service.config import RedisSettings
 
 from .common import Difficulty
 from .config import Channels, settings
-from .grpc import get_one_question, query_num_questions
+from .grpc import query_num_questions
 
 structlog.configure(
     processors=[
@@ -25,6 +25,7 @@ logger = get_logger()
 # Initialize FastAPI app
 app = FastAPI(
     title="Matching Service Backend",
+    root_path="/matching-service",
 )
 
 # CORS middleware

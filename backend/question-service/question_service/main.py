@@ -72,6 +72,7 @@ app = FastAPI(
         }
     },
     lifespan=app_lifespan,
+    root_path="/question-service",
 )
 app.add_middleware(
     CORSMiddleware,
