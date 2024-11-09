@@ -129,7 +129,6 @@ jobs:
         with:
           platforms: ${{ matrix.architecture }}
           context: ${{ env.FRONTEND_CONTEXT }}
-          file: Dockerfile.prod
           push: true
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/${{ env.FRONTEND_NAME }}:${{ env.LATEST_TAG }}
