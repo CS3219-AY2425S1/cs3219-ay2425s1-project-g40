@@ -89,10 +89,6 @@ jobs:
       attestations: write
       id-token: write
 
-    strategy:
-      matrix:
-        architecture: [linux/amd64, linux/arm64]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -127,7 +123,7 @@ jobs:
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ matrix.architecture }}
+          platforms: linux/amd64
           context: ${{ env.FRONTEND_CONTEXT }}
           push: true
           tags: |
