@@ -1,0 +1,93 @@
+services:
+  ## question service
+  question-db:
+    build:
+      context: ./db/question-db
+      dockerfile: Dockerfile
+    ports:
+      - "27017:27017"
+    command: mongod --quiet --logpath /tmp/mongo.log --setParameter logLevel=0 > /dev/null 2>&1
+    environment:
+    - MONGO_INITDB_DATABASE=questions_db
+    - INIT_QUESTION_COLLECTION=questions
+  question-service:
+    depends_on:
+      - question-db
+    command: make server-prod
+    build:
+      context: ./question-service
+      dockerfile: Dockerfile
+    environment:
+      - QUESTION_DB_URL=mongodb://question-db:27017 # note that the URL is referencing the container name
+      - DB_NAME=questions_db
+      - COLLECTION_NAME=questions
+    ports:
+      - "8000:8000"
+
+  ## User service
+  user-db:
+    image: mongodb/mongodb-community-server:6.0.8-ubi9
+    command: mongod --quiet --logpath /dev/null
+    ports:
+      # map port 27017 of user-db to 27018 of local machine
+      - "27018:27017"
+  user-service:
+    depends_on:
+      - user-db
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    environment:
+      - DB_LOCAL_URI=mongodb://user-db:27017/peerprepUserServiceDB  # Connect to port 27017 of **user-db**, NOT 27018
+      - PORT=8000
+      - ENV=DEV
+      - JWT_SECRET=cs3219ay2425-s1-g40-jwt-signature
+    ports:
+      - "8001:8000"
+
+  ## Matching service
+  matchmaker-redis:
+    image: redis:alpine3.20
+    ports:
+      - "6379:6379"
+  matching-service:
+    depends_on:
+      - matchmaker-redis
+      - question-service
+    build:
+      context: ./matching-service
+      dockerfile: Dockerfile
+    command: make server-prod
+    environment:
+      - REDIS_HOST=matchmaker-redis
+      - REDIS_PORT=6379
+      - QUESTIONS_GRPC=question-service:50051
+    ports:
+      - "8002:8000"
+  matching-worker:
+    depends_on:
+      - matchmaker-redis
+    build:
+      context: ./matching-service
+      dockerfile: Dockerfile
+    command: make matchmaker
+    environment:
+      - REDIS_HOST=matchmaker-redis
+      - REDIS_PORT=6379
+      - QUESTIONS_GRPC=question-service:50051
+  # collab service
+  collab-redis:
+    image: redis:alpine3.20
+    ports:
+      - "6380:6379"
+  collab-service:
+    build:
+      context: ./collab-service
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8000
+      - REDIS_HOST=collab-redis
+      - REDIS_PORT=6379
+      - ENV=DEV
+    ports:
+      - "8003:8000"

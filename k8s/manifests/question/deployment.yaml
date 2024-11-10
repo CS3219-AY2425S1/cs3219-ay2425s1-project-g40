@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: peerprep-question
+  name: peerprep-question
+  namespace: peerprep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerprep-question
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peerprep-question
+    spec:
+      containers:
+        - image: asia-southeast1-docker.pkg.dev/cs3219-g40/peerprep-g40/question-service:latest
+          name: peerprep-question
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000 # http
+            - containerPort: 50051 # grpc
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1G
+          env:
+            - name: QUESTION_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: peerprep-secret
+                  key: QUESTION_DB_URL
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTION_DB_NAME
+            - name: COLLECTION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTION_COLLECTION_NAME
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTION_ENV
+status: {}

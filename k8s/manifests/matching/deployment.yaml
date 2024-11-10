@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: peerprep-matching
+  name: peerprep-matching
+  namespace: peerprep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerprep-matching
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peerprep-matching
+    spec:
+      containers:
+        - image: asia-southeast1-docker.pkg.dev/cs3219-g40/peerprep-g40/matching-service:latest
+          imagePullPolicy: Always
+          name: peerprep-matching
+          ports:
+            - containerPort: 8000 # http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1G
+          command: ["make", "server"]
+          env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: MATCHMAKER_REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: MATCHMAKER_REDIS_PORT
+            - name: QUESTIONS_GRPC
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: QUESTIONS_GRPC
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: MATCHING_ENV
+status: {}

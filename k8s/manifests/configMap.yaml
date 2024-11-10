@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: peerprep-config
+  namespace: peerprep
+data:
+  USER_PORT: "8000"
+  USER_ENV: PROD
+
+  QUESTION_ENV: PROD
+  QUESTION_DB_NAME: QuestionServiceDb
+  QUESTION_COLLECTION_NAME: questions
+  QUESTIONS_GRPC: peerprep-question-grpc:50051
+
+  MATCHING_ENV: PROD
+  MATCHMAKER_REDIS_HOST: matchmaker-redis-service
+  MATCHMAKER_REDIS_PORT: "6379"
+
+  COLLAB_PORT: "8000"
+  COLLAB_ENV: PROD
+  COLLAB_REDIS_HOST: collab-redis-service
+  COLLAB_REDIS_PORT: "6379"

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: peerprep-user
+  name: peerprep-user
+  namespace: peerprep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: peerprep-user
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: peerprep-user
+    spec:
+      containers:
+        - image: asia-southeast1-docker.pkg.dev/cs3219-g40/peerprep-g40/user-service:latest
+          imagePullPolicy: Always
+          name: peerprep-user
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 1G
+          env:
+            - name: DB_CLOUD_URI
+              valueFrom:
+                secretKeyRef:
+                  name: peerprep-secret
+                  key: DB_CLOUD_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: peerprep-secret
+                  key: JWT_SECRET
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: USER_PORT
+            - name: ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: peerprep-config
+                  key: USER_ENV
+status: {}
