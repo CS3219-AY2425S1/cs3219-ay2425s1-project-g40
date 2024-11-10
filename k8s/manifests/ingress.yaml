@@ -10,11 +10,17 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:3000" # add Cloud Run here
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:3000, https://peerprep-frontend-418708025075.asia-southeast1.run.app" # add Cloud Run here
+    nginx.ingress.kubernetes.io/ingress.regional-static-ip-name: "peerprep-ip"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - peerpreps.com
+      secretName: letsencrypt-prod
   rules:
-    - host: api.peerprep.svc.local
+    - host: peerpreps.com
       http:
         paths:
           - path: /user-service/(.*)
