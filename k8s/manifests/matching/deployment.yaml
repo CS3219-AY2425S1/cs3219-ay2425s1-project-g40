@@ -19,14 +19,14 @@ spec:
         app: peerprep-matching
     spec:
       containers:
-        - image: alxarkar/matching-service:latest
+        - image: asia-southeast1-docker.pkg.dev/cs3219-g40/peerprep-g40/matching-service:latest
           imagePullPolicy: Always
           name: peerprep-matching
           ports:
             - containerPort: 8000 # http
           resources:
             requests:
-              cpu: 0.5
+              cpu: 100m
               memory: 1G
           command: ["make", "server"]
           env:
