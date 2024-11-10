@@ -27,7 +27,6 @@ jobs:
 
     strategy:
       matrix:
-        architecture: [linux/amd64, linux/arm64]
         service:
           - name: user-service
             context: "{{defaultContext}}:/backend/user-service"
@@ -73,7 +72,7 @@ jobs:
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ matrix.architecture }}
+          platforms: linux/amd64
           context: ${{ matrix.service.context }}
           push: true
           tags: |
